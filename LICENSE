@@ -1,0 +1,131 @@
+FOREVER MACHINES SDK LICENSE
+Version 1.0, 15 November 2026
+
+Copyright (c) 2026 Juan Maguid, Temperamento. All rights reserved.
+
+(This is a plain-language license and has not been reviewed by a lawyer.)
+
+In short: you may try it, build with it, and use it for personal and non-commercial projects for
+free. If you put it in a product or service that makes money or is offered to the public as a
+business, you need a commercial license from us. You may not resell it or turn it into a
+competing library.
+
+1. DEFINITIONS
+
+"SDK" means the software in this package (the files in src/ and anything this license
+accompanies), including the copy served at https://forevermachines.net/sdk/.
+
+"Materials" means the machines, effects, the kit, the skins (themes) and any other code or
+data that the SDK loads, or that is served from forevermachines.net under /kit, /machines,
+/effects, /sleep and /sdk, whether or not through the SDK.
+
+"Application" means an app, website, game, device or service that you build and that uses
+the SDK or the Materials.
+
+"Output" means the sound produced, and the pictures drawn, when the Materials run in
+your Application.
+
+"You" means the person or organization using the SDK or the Materials. "We" and "us" mean
+Juan Maguid, trading as Temperamento (the Licensor).
+
+2. FREE USE
+
+You may, without charge, use, run, copy and modify the SDK and the Materials:
+
+(a) to evaluate them, and to develop and test an Application that is not yet offered to others;
+(b) in personal projects that are not offered for sale or used to earn money, directly or
+    indirectly (including by advertising, subscriptions, in-app purchases or paid access);
+(c) for teaching, study and research that is not commercial.
+
+When you use the Materials under this section in anything shown to others, keep a visible
+credit such as "Sound by Forever Machines" with a link to https://forevermachines.net.
+
+3. COMMERCIAL USE
+
+Any other use needs a commercial license from us, agreed in writing (an order form, an
+invoice that says so, or a signed agreement), with the price, term, number of Applications and
+any support or key terms set out there. In particular, you need one before you make an
+Application available to users who are not you, if you or your organization earn money from it
+or it is part of a business. Until you have one, Section 2 is all you may do. A commercial
+license may also include API keys: using the Materials without a key where one is required is
+not licensed.
+
+4. WHAT YOU MAY DO WITH A LICENSE (free or commercial)
+
+Subject to Section 2 or 3 and to this license as a whole, you get a worldwide, non-exclusive,
+non-transferable, non-sublicensable right to:
+
+(a) embed the SDK and run the Materials unmodified in your Application;
+(b) modify the SDK's source as needed to integrate it, for your own Application only, keeping
+    these notices;
+(c) let the end users of your Application hear and see the Output.
+
+5. WHAT YOU MAY NOT DO
+
+(a) Resell, rent, sublicense, publish or redistribute the SDK or the Materials, in whole or in
+    part, as a product, library, package, API, template or collection, or bundle them in an
+    offering whose value is mainly them.
+(b) Copy, scrape or extract machines, effects or the kit to build or populate a competing
+    collection, marketplace, library or service.
+(c) Sell or distribute recordings of the Output as standalone audio (sample packs, stock audio,
+    loops, music libraries), or register it with a collecting society or a content-ID system as
+    your own work.
+(d) Use the Materials, or what they produce, to train, fine-tune or evaluate a machine-learning
+    model, or to build a dataset for that purpose.
+(e) Remove, hide or change copyright, license or credit notices.
+(f) Bypass any key, rate limit or access control, or load the Materials from our servers in a way
+    that puts an unreasonable load on them.
+(g) Use the SDK or the Materials for anything unlawful, or to build malware or to harm others.
+
+6. OWNERSHIP
+
+We keep all rights in the SDK and the Materials. You are licensed, not sold, a copy. The machines
+are our creative works; this license gives you no right to our names, logos or trademarks,
+including "Forever Machines". The Output you hear in your Application is yours to use inside your
+Application as Section 4 says; Section 5(c) still applies.
+
+7. THIRD-PARTY PARTS
+
+Some parts, such as the fonts shown on the demo pages (Bricolage Grotesque and Instrument Serif,
+under the SIL Open Font License), come with their own licenses, which apply to them and are not
+changed by this one.
+
+8. THE SERVICE
+
+The Materials are served from forevermachines.net as a convenience. We may add keys or rate
+limits, change, rename or retire a machine, or stop serving a file at any time, unless a
+commercial license says otherwise. A commercial license may include a service level; without one,
+there is none, and you should keep your own copy of anything you depend on, as far as your license
+allows.
+
+9. NO WARRANTY
+
+The SDK and the Materials are provided "as is", without warranty of any kind, express or implied,
+including fitness for a particular purpose, non-infringement, and that they will run without
+errors or interruption, or sound the same on every device. Sound can be loud or quiet on
+different hardware: set sensible levels in your Application and do not use it for anything where
+a fault could harm someone, such as a safety alarm.
+
+10. LIMIT OF LIABILITY
+
+To the fullest extent the law allows, we are not liable for any indirect, incidental, special or
+consequential loss, or for lost profit, data or goodwill, and our total liability for anything
+arising from the SDK or the Materials is limited to the amount you paid us for them in the twelve
+months before the claim (or 100 EUR if you paid nothing). Nothing here limits liability that
+cannot be limited by law.
+
+11. TERMINATION
+
+This license ends automatically if you break it. If the breach can be fixed, we will tell you and
+you will have thirty days to fix it. When it ends, you must stop using the SDK and the Materials
+and remove them from your Application. Sections 5, 6, 9, 10 and 12 continue after it ends.
+
+12. GENERAL
+
+This license is governed by the laws of Sweden, without regard to its conflict-of-law rules, and
+the Swedish courts have the exclusive jurisdiction, except where the law of your country gives you rights that cannot be waived.
+If a part of this license is unenforceable, the rest stays in force. We may update this license for
+new versions of the SDK; the version that came with the copy you received applies to it. A written
+commercial license from us overrides this text where they differ.
+
+Contact for commercial licenses: Juan Maguid, Temperamento, https://temperamento.net
