@@ -208,7 +208,7 @@ public final class FMMachine {
     public func macros() -> [FMControl] {
         let all = controls(), tempo = try! Regex("^(tempo|bpm|speed)$").ignoresCase()
         let knobs = all.filter { $0.kind == "knob" && $0.label.wholeMatch(of: tempo) == nil }
-        return Array((knobs + all.filter { $0.kind != "knob" }).prefix(8))
+        return Array((knobs + all.filter { $0.kind == "toggle" || $0.kind == "select" }).prefix(8))
     }
 
     /// Moves Macro n (1–8) to v (0–1). false if the machine has no such macro.
