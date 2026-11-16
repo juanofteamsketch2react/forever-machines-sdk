@@ -258,7 +258,7 @@
       }
       return b;
     }
-    const verb = ac.createConvolver(); verb.buffer = impulse(3.4, 2.4);
+    const verb = ac.createConvolver(); verb.buffer = ac.createImpulse ? ac.createImpulse(3.4, 2.4) : impulse(3.4, 2.4);   // (FM Core makes the impulse itself)
     const verbIn = ac.createGain();
     const verbOut = ac.createGain(); verbOut.gain.value = 0.7;
     // (an effect pays for the kit's reverb and echo only if it uses them: m.verb / m.echo connect them on first use)

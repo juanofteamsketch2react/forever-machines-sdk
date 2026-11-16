@@ -178,6 +178,7 @@
     copyFromChannel(dst, c, start = 0) { dst.set(this._data[c].subarray(start, start + dst.length)); }
     _send() { // uploaded once, the first time a node uses it
       if (this._sent) return; this._sent = true;
+      if (typeof __fm !== 'undefined') { op('bf', this._id, this.numberOfChannels, this.length, this.sampleRate, this._data); return; }   // (FM Core takes the floats as they are: no packing)
       const chans = this._data.map(pack);
       op('b', this._id, this.numberOfChannels, this.length, this.sampleRate, chans.map((c) => c[0]), chans.map((c) => c[1]));
     }
@@ -363,6 +364,10 @@
       return p;
     }
   }
+  // FM Core only: a reverb's impulse (noise under a (1 - t)^decay tail) made by the core, the page neither generates nor uploads its samples
+  if (typeof __fm !== 'undefined') Context.prototype.createImpulse = function (seconds, decay) {
+    const b = new AudioBufferShim(2, Math.floor(this.sampleRate * seconds), this.sampleRate); b._sent = true; op('imp', b._id, b.length, b.sampleRate, decay); return b;
+  };
   window.AudioContext = window.webkitAudioContext = Context;
   let nextDecode = 1;
   const decodes = new Map();

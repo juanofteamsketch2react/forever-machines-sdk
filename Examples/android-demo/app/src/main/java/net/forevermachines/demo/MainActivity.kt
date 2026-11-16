@@ -66,6 +66,7 @@ class MainActivity : Activity() {
     private var editing: String? = null
     private var ticks = 0
     private var finger: Pair<Float, Float>? = null
+    private var shown: Bitmap? = null
     private val dials = mutableMapOf<String, Dial>()
     private val texts = mutableMapOf<String, (FMControl) -> Unit>()
 
@@ -200,6 +201,7 @@ class MainActivity : Activity() {
         picture.setOnTouchListener { v, e ->
             val m = machine ?: return@setOnTouchListener false
             if (e.actionMasked == MotionEvent.ACTION_DOWN) v.parent.requestDisallowInterceptTouchEvent(true)   // (the page must not take the finger to scroll)
+            if (e.actionMasked == MotionEvent.ACTION_DOWN && !fm.isPlaying) { fm.power(true); paint() }   // (a touch on the machine starts the night)
             val sw = m.screenSize.first.takeIf { it > 0f } ?: (v.width / dp)
             val k = sw / v.width.coerceAtLeast(1)
             val type = when (e.actionMasked) { MotionEvent.ACTION_DOWN -> "pointerdown"; MotionEvent.ACTION_MOVE -> "pointermove"; else -> "pointerup" }
@@ -338,7 +340,8 @@ class MainActivity : Activity() {
             machine?.let { m ->
                 m.screenBitmap()?.let {
                     val first = picture.drawable == null
-                    picture.setImageBitmap(it)
+                    // the SDK draws into the same Bitmap each time: set it once, then only redraw the view
+                    if (it !== shown) { picture.setImageBitmap(it); shown = it } else picture.invalidate()
                     if (first) scroller.post {
                         if (intent.getBooleanExtra("dials", false)) scroller.fullScroll(View.FOCUS_DOWN) else scroller.scrollTo(0, 0)   // (dials: for screenshots)
                     }
