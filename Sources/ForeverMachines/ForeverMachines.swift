@@ -63,6 +63,8 @@ public final class FMSession {
     private let winder = Wind()
     private var driftOn = false, bpm = 0.0
     private var observers: [NSObjectProtocol] = []
+    var catalogCache: (at: Date, list: [FMCatalogEntry])?
+    var effectsCache: [FMEffect]?
 
     public init(options: Options = Options()) {
         self.options = options
@@ -84,39 +86,74 @@ public final class FMSession {
     }
 
     /// Mounts a machine by name: one bundled with the SDK (the six sleep machines: slow-tide, night-choir, seven-bowls,
-    /// lotus-pond, rain-window, long-breath), else /machines/<name>.js from `options.base`.
-    public func mount(_ name: String, skin: String? = nil, seed: Double = 1) async throws -> FMMachine {
+    /// lotus-pond, rain-window, long-breath), else /machines/<name>.js from `options.base` (a species of the collection,
+    /// e.g. "loom"; for a numbered machine exactly as the site plays it, use mount(number:)).
+    /// effect: a Forever Effect's id (see effects()) run inside the machine, at effectMix.
+    public func mount(_ name: String, skin: String? = nil, seed: Double = 1, effect: String? = nil, effectMix: Double = 0.5) async throws -> FMMachine {
         if let url = Bundle.module.url(forResource: name, withExtension: "js", subdirectory: "fm/machines"),
            let code = try? String(contentsOf: url, encoding: .utf8) {
-            return try mount(code: code, name: name, skin: skin, seed: seed)
+            return try await mount(code: code, name: name, skin: skin, seed: seed, effect: effect, effectMix: effectMix)
         }
-        return try await mount(url: options.base.appendingPathComponent("machines/\(name).js"), name: name, skin: skin, seed: seed)
+        return try await mount(url: options.base.appendingPathComponent("machines/\(name).js"), name: name, skin: skin, seed: seed, effect: effect, effectMix: effectMix)
+    }
+
+    /// Mounts No. `number` of the collection exactly as the site plays it: its species, seed, skin and name (see catalog();
+    /// a bonus machine is 501 and up, as in its address). Needs the network the first time.
+    public func mount(number: Int, effect: String? = nil, effectMix: Double = 0.5) async throws -> FMMachine {
+        guard let c = try await catalog().first(where: { $0.number == number }) else { throw FMError.notFound("No. \(number)") }
+        let code = try await fetchText(options.base.appendingPathComponent("machines/\(c.file)"))
+        let extra = #"{"index":\#(c.number - 1),"no":"\#(c.no)","original":\#(c.original)}"#
+        return try await mount(code: code, name: c.name, skin: c.themeJSON, seed: c.seed, effect: effect, effectMix: effectMix, extra: extra)
     }
 
     /// Mounts a machine from any URL.
-    public func mount(url: URL, name: String? = nil, skin: String? = nil, seed: Double = 1) async throws -> FMMachine {
-        let (data, response) = try await URLSession.shared.data(from: url)
-        guard (response as? HTTPURLResponse)?.statusCode ?? 200 < 300, let code = String(data: data, encoding: .utf8) else {
-            throw FMError.notFound(url.absoluteString)
-        }
-        return try mount(code: code, name: name ?? url.deletingPathExtension().lastPathComponent, skin: skin, seed: seed)
+    public func mount(url: URL, name: String? = nil, skin: String? = nil, seed: Double = 1, effect: String? = nil, effectMix: Double = 0.5) async throws -> FMMachine {
+        let code = try await fetchText(url)
+        return try await mount(code: code, name: name ?? url.deletingPathExtension().lastPathComponent, skin: skin, seed: seed, effect: effect, effectMix: effectMix)
     }
 
     /// Mounts a machine from its source.
-    public func mount(code: String, name: String, skin: String? = nil, seed: Double = 1) throws -> FMMachine {
-        let root = Bundle.module.url(forResource: "fm", withExtension: nil)!.path
-        let core = FMCoreMachine(root: root, sampleRate: output.sampleRate)
-        do { try core.bootCode(code, name: name, skin: skin ?? "", state: "{}", seed: seed) } catch { throw FMError.boot(error.localizedDescription) }
-        let m = FMMachine(core: core, name: name, session: self)
-        core.onRequest = { [weak m, network = options.network] json in Task { @MainActor in m?.answer(json, network: network) } }
-        core.start(withFPS: 30)
-        m.post(#"{"fm":"power","on":\#(isPlaying)}"#)
-        if driftOn { m.post(#"{"fm":"drift","on":true}"#) }
-        if bpm > 0 { m.post(#"{"fm":"tempo","bpm":\#(bpm),"anchor":0}"#) }
-        if winder.state.on { m.post(#"{"fm":"wind","v":\#(winder.state.v)}"#) }
+    public func mount(code: String, name: String, skin: String? = nil, seed: Double = 1, effect: String? = nil, effectMix: Double = 0.5) async throws -> FMMachine {
+        try await mount(code: code, name: name, skin: skin, seed: seed, effect: effect, effectMix: effectMix, extra: "{}")
+    }
+
+    func mount(code: String, name: String, skin: String?, seed: Double, effect: String?, effectMix: Double, extra: String) async throws -> FMMachine {
+        let fx = try await loadEffect(effect)
+        let spec = FMMachine.Spec(code: code, name: name, skin: skin ?? "", seed: seed, extra: extra, effect: fx, effectMix: effectMix)
+        let m = FMMachine(core: try boot(spec, state: "{}"), spec: spec, session: self)
         machines.append(m)
         output.set(machines.map(\.core))
         return m
+    }
+
+    // a core for the machine, started and told what the session is doing
+    func boot(_ s: FMMachine.Spec, state: String, playing: Bool? = nil) throws -> FMCoreMachine {
+        let root = Bundle.module.url(forResource: "fm", withExtension: nil)!.path
+        let core = FMCoreMachine(root: root, sampleRate: output.sampleRate)
+        var extra = s.extra
+        if let fx = s.effect, extra.hasSuffix("}") {   // (the effect's title, for its section)
+            let t = String(data: try JSONSerialization.data(withJSONObject: [fx.title]), encoding: .utf8)!.dropFirst().dropLast()
+            extra = String(extra.dropLast()) + (extra == "{}" ? "" : ",") + #""insertTitle":\#(t)}"#
+        }
+        do {
+            try core.bootCode(s.code, name: s.name, skin: s.skin, state: state, seed: s.seed, effect: s.effect?.code ?? "", effectMix: s.effectMix, extra: extra)
+        } catch { throw FMError.boot(error.localizedDescription) }
+        core.start(withFPS: 30)
+        core.post(#"{"fm":"power","on":\#(playing ?? isPlaying)}"#)
+        if driftOn { core.post(#"{"fm":"drift","on":true}"#) }
+        if bpm > 0 { core.post(#"{"fm":"tempo","bpm":\#(bpm),"anchor":0}"#) }
+        if winder.state.on { core.post(#"{"fm":"wind","v":\#(winder.state.v)}"#) }
+        return core
+    }
+
+    func swapped() { output.set(machines.map(\.core)) }
+
+    func fetchText(_ url: URL) async throws -> String {
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard (response as? HTTPURLResponse)?.statusCode ?? 200 < 300, let s = String(data: data, encoding: .utf8) else {
+            throw FMError.notFound(url.absoluteString)
+        }
+        return s
     }
 
     /// Every machine on or off. On iOS, add "audio" to UIBackgroundModes so it plays on with the screen locked.
@@ -181,17 +218,59 @@ public final class FMSession {
 
 @MainActor
 public final class FMMachine {
-    public let name: String
+    struct Spec { var code, name, skin: String; var seed: Double; var extra: String; var effect: FMEffectCode?; var effectMix: Double }
+
+    public var name: String { spec.name }
     public internal(set) var isPlaying = false
-    let core: FMCoreMachine
+    /// The Forever Effect running inside it, if any (its title).
+    public var effectTitle: String? { spec.effect?.title }
+    private(set) var core: FMCoreMachine
+    private var spec: Spec
     private weak var session: FMSession?
 
-    init(core: FMCoreMachine, name: String, session: FMSession) { self.core = core; self.name = name; self.session = session }
+    init(core: FMCoreMachine, spec: Spec, session: FMSession) {
+        self.core = core; self.spec = spec; self.session = session
+        isPlaying = session.isPlaying
+        wire()
+    }
+
+    private func wire() {
+        core.onRequest = { [weak self, network = session?.options.network ?? true] json in Task { @MainActor in self?.answer(json, network: network) } }
+    }
+
+    /// Puts a Forever Effect inside the machine (its id, from effects()), or takes it off (nil). The machine starts again
+    /// with the same knobs, power, drift and wind; the amount can then move freely with effectMix.
+    public func effect(_ id: String?, mix: Double? = nil) async throws {
+        guard let session else { return }
+        spec.effect = try await session.loadEffect(id)
+        if let mix { spec.effectMix = mix }
+        let state = core.evaluate("JSON.stringify(__fmState || {})")
+        let next = try session.boot(spec, state: state.isEmpty ? "{}" : state, playing: isPlaying)
+        let old = core
+        core = next
+        wire()
+        session.swapped()
+        old.stop()
+    }
+
+    /// How much of the effect (0–1), without restarting.
+    public func effectMix(_ v: Double) {
+        spec.effectMix = min(1, max(0, v))
+        post(#"{"fm":"insert-mix","v":\#(spec.effectMix)}"#)
+    }
 
     /// The output's loudest moment since last asked (0 to about 1), for a meter or a lantern.
     public var level: Float { core.takePeak() }
 
     public func power(_ on: Bool) { isPlaying = on; post(#"{"fm":"power","on":\#(on)}"#) }
+
+    /// The colours of the skin it wears, as CSS colours by role: page, page-ink, dev (the device), head, line, ink, dim,
+    /// accent, accent2, accent-ink, track, field, field-ink, screen, screen-ink, screen-alt, screen-dim. Enough to dress a
+    /// panel of your own in the machine's look.
+    public var colors: [String: String] {
+        let json = core.evaluate("JSON.stringify((globalThis.__fmTheme && __fmTheme.vars) || {})")
+        return (try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: String]) ?? [:]
+    }
 
     /// The machine's controls, in Macro order first.
     public func controls() -> [FMControl] {

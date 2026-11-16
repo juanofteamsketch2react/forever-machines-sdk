@@ -1,0 +1,140 @@
+{
+ "slow-tide": {
+  "name": "midnight",
+  "label": "Midnight",
+  "vars": {
+   "page": "#070a1c",
+   "page-ink": "#c9d0ff",
+   "dev": "#151b3d",
+   "head": "#1b2249",
+   "line": "#28326a",
+   "ink": "#dfe4ff",
+   "dim": "#7d87c4",
+   "accent": "#ff3d9a",
+   "accent2": "#3df5e0",
+   "accent-ink": "#fff",
+   "track": "#2a3470",
+   "field": "#0d1230",
+   "field-ink": "#dfe4ff",
+   "screen": "#05071a",
+   "screen-ink": "#3df5e0",
+   "screen-alt": "#ff3d9a",
+   "screen-dim": "#1c2350"
+  }
+ },
+ "night-choir": {
+  "name": "ultraviolet",
+  "label": "Ultraviolet",
+  "vars": {
+   "page": "#12001f",
+   "page-ink": "#e2c6ff",
+   "dev": "#24073b",
+   "head": "#2d0b49",
+   "line": "#45176b",
+   "ink": "#efdcff",
+   "dim": "#a07cc2",
+   "accent": "#d4ff3a",
+   "accent2": "#b26bff",
+   "accent-ink": "#12001f",
+   "track": "#3a1460",
+   "field": "#1a042c",
+   "field-ink": "#efdcff",
+   "screen": "#0b0014",
+   "screen-ink": "#d4ff3a",
+   "screen-alt": "#ff5ed8",
+   "screen-dim": "#2b0e47"
+  }
+ },
+ "seven-bowls": {
+  "name": "brass",
+  "label": "brass",
+  "vars": {
+   "page": "#140c06",
+   "page-ink": "#f3dcc0",
+   "dev": "#2a1a0e",
+   "head": "#34210f",
+   "line": "#553818",
+   "ink": "#f6e3c8",
+   "dim": "#b08d62",
+   "accent": "#ffb347",
+   "accent2": "#ff7a4d",
+   "accent-ink": "#1a0f05",
+   "track": "#3d2812",
+   "field": "#1c1108",
+   "field-ink": "#f6e3c8",
+   "screen": "#0f0804",
+   "screen-ink": "#ffb347",
+   "screen-alt": "#ff7a4d",
+   "screen-dim": "#3a2410"
+  }
+ },
+ "lotus-pond": {
+  "name": "lagoon",
+  "label": "lagoon",
+  "vars": {
+   "page": "#04141a",
+   "page-ink": "#cdeee6",
+   "dev": "#0b2a31",
+   "head": "#0e343c",
+   "line": "#1a4c56",
+   "ink": "#d9f5ee",
+   "dim": "#6fa7a4",
+   "accent": "#ff8fc0",
+   "accent2": "#5cf2c8",
+   "accent-ink": "#04141a",
+   "track": "#12404a",
+   "field": "#06191e",
+   "field-ink": "#d9f5ee",
+   "screen": "#031014",
+   "screen-ink": "#5cf2c8",
+   "screen-alt": "#ff8fc0",
+   "screen-dim": "#0f3138"
+  }
+ },
+ "rain-window": {
+  "name": "moss",
+  "label": "Moss",
+  "vars": {
+   "page": "#0f160e",
+   "page-ink": "#e9e4cf",
+   "dev": "#2d3a2a",
+   "head": "#344331",
+   "line": "#445640",
+   "ink": "#e9e4cf",
+   "dim": "#9aa58b",
+   "accent": "#ff9d6b",
+   "accent2": "#c6e86b",
+   "accent-ink": "#1b1b1b",
+   "track": "#1d261b",
+   "field": "#1d261b",
+   "field-ink": "#e9e4cf",
+   "screen": "#121a11",
+   "screen-ink": "#c6e86b",
+   "screen-alt": "#ff9d6b",
+   "screen-dim": "#263224"
+  }
+ },
+ "long-breath": {
+  "name": "dawn",
+  "label": "dawn",
+  "vars": {
+   "page": "#1a1024",
+   "page-ink": "#ffe3d2",
+   "dev": "#2c1b38",
+   "head": "#372245",
+   "line": "#55375f",
+   "ink": "#ffe9dc",
+   "dim": "#b891a8",
+   "accent": "#ff9a6b",
+   "accent2": "#ffd08a",
+   "accent-ink": "#1a1024",
+   "track": "#45294f",
+   "field": "#1f1229",
+   "field-ink": "#ffe9dc",
+   "screen": "#150c1d",
+   "screen-ink": "#ffb48a",
+   "screen-alt": "#ffd9a0",
+   "screen-dim": "#3b2447"
+  }
+ }
+}

@@ -1,0 +1,464 @@
+{
+  "epoch": "2026-10-12",
+  "birth": {
+    "tz": "Europe/Stockholm",
+    "time": "06:00"
+  },
+  "genesis": 13,
+  "archetypes": [
+    {
+      "id": "shortwave",
+      "file": "shortwave.js",
+      "debut": 0,
+      "by": "human",
+      "theme": "moss",
+      "title": "Shortwave",
+      "blurb": "A receiver for a band nobody else is listening to. Turn the dial: somewhere in the hiss there are stations, numbers read out as chimes, morse, a hymn, a lone carrier tone, something that pulses like a dead star. Each band holds different ones. Switch on Scan and let it search by itself.",
+      "thoughts": [
+        "Somewhere a transmitter is still reading numbers to no one.",
+        "Static is not empty. It is everything at once.",
+        "Tuning is listening with your hands.",
+        "The best stations are the ones you can never find twice."
+      ],
+      "rev": "62128bf735eb",
+      "patches": [
+        {
+          "date": "2026-11-05",
+          "note": "Now has a Scale menu: pick the scale here, and it follows the master Key Sync like every machine."
+        }
+      ]
+    },
+    {
+      "id": "orrery",
+      "file": "orrery.js",
+      "debut": 1,
+      "by": "human",
+      "theme": "midnight",
+      "title": "Orrery",
+      "blurb": "Planets on concentric orbits, each sounding as it crosses the needle at twelve o’clock. Inner planets are fast and high, outer ones slow and low. Integer laws make polyrhythms that return home; the golden law never repeats; drift makes them phase apart like a Steve Reich tape loop.",
+      "thoughts": [
+        "The sky has been playing this piece for four billion years. We tuned in late.",
+        "A rhythm is a promise to come back.",
+        "Two clocks that disagree slightly are more interesting than two that agree.",
+        "Pythagoras heard it. He was not wrong, only early."
+      ],
+      "rev": "344c96245081"
+    },
+    {
+      "id": "colony",
+      "file": "colony.js",
+      "debut": 2,
+      "by": "human",
+      "theme": "phosphor",
+      "title": "Colony",
+      "blurb": "A cellular automaton read like a piano roll. A playhead sweeps left to right; every living cell it crosses sings, higher rows higher notes. After each sweep the colony lives one more generation. Click or drag on the grid to plant life. If it dies out, settlers arrive.",
+      "thoughts": [
+        "Birth, survival, overcrowding: three rules, rearranged into songs.",
+        "Every chord here is a census.",
+        "A melody is what a population sounds like from the outside.",
+        "Nothing in the colony knows it is making music. Neither do we, mostly."
+      ],
+      "rev": "1f6081674e8e"
+    },
+    {
+      "id": "loom",
+      "file": "loom.js",
+      "debut": 3,
+      "by": "human",
+      "theme": "bakelite",
+      "title": "Loom",
+      "blurb": "Six threads of sound, each breathing slowly through its own filter. The picture is the chord: every thread you see is a voice you hear, its thickness its loudness, its wave its breath. Change the Weave and the threads glide to new pitches. Let it run for an hour.",
+      "thoughts": [
+        "Patience is an instrument.",
+        "A drone is a room you can carry.",
+        "Weaving and harmony are the same craft: tension, held.",
+        "Nothing happens here, beautifully, for as long as you like."
+      ],
+      "rev": "728709f01cfd",
+      "patches": [
+        {
+          "date": "2026-11-05",
+          "note": "Now has a Scale menu: pick the scale here, and it follows the master Key Sync like every machine."
+        }
+      ]
+    },
+    {
+      "id": "turmite-choir",
+      "file": "turmite-choir.js",
+      "debut": 4,
+      "by": "human",
+      "theme": "riso",
+      "title": "Turmite Choir",
+      "blurb": "Ants on a grid obey one law: turn according to the colour underfoot, repaint it, step forward. For thousands of steps they make a mess; then, sometimes, they discover a highway and march off in a perfect loop. Each ant sings where it stands whenever it turns left.",
+      "thoughts": [
+        "Order is what chaos does if you wait long enough.",
+        "Langton’s ant needs ten thousand steps of mess before it finds the road. So did most of us.",
+        "A choir of creatures who cannot hear each other, somehow still in key.",
+        "Simple rules, followed faithfully, become a landscape."
+      ],
+      "rev": "dcd54a42d1db"
+    },
+    {
+      "id": "euclid-ratchet",
+      "file": "euclid-ratchet.js",
+      "debut": 5,
+      "by": "human",
+      "theme": "sulfur",
+      "title": "Euclid Ratchet",
+      "blurb": "Four voices, each spreading its hits as evenly as possible around its own loop, the Euclidean way. Give the rings different lengths and the pattern slides against itself, only lining up again after a long while. Ratchet turns some hits into stuttering rolls.",
+      "thoughts": [
+        "The oldest rhythms on Earth are a division problem.",
+        "Evenness, applied to unequal things, sounds like groove.",
+        "Euclid wrote about remainders. Drummers had been playing them for centuries already.",
+        "A polyrhythm is two honest clocks arguing politely."
+      ],
+      "rev": "e348bd64a039",
+      "patches": [
+        {
+          "date": "2026-11-05",
+          "note": "Now has a Scale menu: pick the scale here, and it follows the master Key Sync like every machine."
+        }
+      ]
+    },
+    {
+      "id": "double-pendulum",
+      "file": "double-pendulum.js",
+      "debut": 6,
+      "by": "human",
+      "theme": "lab",
+      "title": "Double Pendulum",
+      "blurb": "Two arms, one hinge in the middle, and no way to predict where it goes next. The angles steer an FM voice, the upper arm its pitch, the lower arm its snarl, and every time the lower weight swings through the bottom a bell rings. The trail it draws is the score. Kick it if it gets tired.",
+      "thoughts": [
+        "Determinism is not the same as predictability.",
+        "Join two simple things together and you can no longer forecast them. Ask any couple.",
+        "The trail is the score; the pendulum never reads it.",
+        "Chaos is just sensitivity, taken seriously."
+      ],
+      "rev": "1b92371e9c8b",
+      "patches": [
+        {
+          "date": "2026-11-05",
+          "note": "Now has a Scale menu: pick the scale here, and it follows the master Key Sync like every machine."
+        }
+      ]
+    },
+    {
+      "id": "pebble-box",
+      "file": "pebble-box.js",
+      "debut": 7,
+      "by": "human",
+      "theme": "live",
+      "title": "Pebble Box",
+      "blurb": "Pebbles rattle inside a slowly turning polygon. Every wall is tuned to one note of the scale, so the shape of the room is the melody. Click inside the chamber to kick them, tilt it with Spin, starve it of Gravity and watch them float.",
+      "thoughts": [
+        "A song is just a set of walls and something restless inside them.",
+        "Nobody composes the rattle in a pocket. It is still music.",
+        "Constraint is the composer; chance only performs.",
+        "Every room has a pitch. Throw something and you will hear it."
+      ],
+      "rev": "1bdb81849e45"
+    },
+    {
+      "id": "dendrophone",
+      "file": "inv-009-dendrophone.js",
+      "debut": 8,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-10-14T08:19:03.059Z",
+      "provocation": "tree rings as a record of weather",
+      "title": "Dendrophone",
+      "blurb": "A slice of a tree that plays its own history. A core-borer needle reads from pith to bark, one ring per note: wet years grew wide rings that ring long and low, droughts left thin ones that hurry past high and bright. Every pass adds a new year from the climate you set with the knobs. Choose the wood it is played on: Resin is a warm detuned pad, Xylem a struck marimba, Phloem a bowed voice whose vowel follows the rain, Heartwood a gliding acid line. Click a ring (on the slice or the core) to scar it: once for frost, which sounds as a glass bell, twice for fire, which crackles.",
+      "thoughts": [
+        "A tree keeps a diary in the only language it has: width.",
+        "Wet years are slow songs. Droughts go by quickly.",
+        "Every ring is a summer that somebody, somewhere, complained about.",
+        "The bark is the present tense, and it is very thin."
+      ],
+      "liveFrom": "2026-10-14",
+      "rev": "5f6a2f89b59d"
+    },
+    {
+      "id": "mouthpiece",
+      "file": "mouthpiece.js",
+      "debut": 9,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-10-14T09:53:10Z",
+      "theme": "ultraviolet",
+      "liveFrom": "2026-10-14",
+      "provocation": "public-domain voices chopped into a groove (asked for by Juan)",
+      "title": "Mouthpiece",
+      "blurb": "A voice from the public domain, cut into a groove. Every week brings a new clip, an old audiobook reading or a scrap of NASA mission audio, sliced at its syllables and replayed over a small drum machine. Press Mic to feed it your own voice instead (the recording never leaves your browser), or Next for another voice from the archive. Click the waveform to audition a slice; click a step to change which slice it plays.",
+      "thoughts": [
+        "Every voice here once expected to be listened to. Now it is being danced to.",
+        "Cut speech small enough and it turns back into music.",
+        "The public domain is a choir that never rehearsed together.",
+        "A syllable is a drum hit with an opinion."
+      ],
+      "rev": "31728ded3841",
+      "patches": [
+        {
+          "date": "2026-11-04",
+          "note": "Slices start where each syllable begins, so the first sound is no longer swallowed, and they ring out longer before the next one. Your own recordings slice cleaner too."
+        },
+        {
+          "date": "2026-11-05",
+          "note": "Now has a Scale menu: pick the scale here, and it follows the master Key Sync like every machine."
+        }
+      ]
+    },
+    {
+      "id": "granny-s-scarf",
+      "file": "inv-011-granny-s-scarf.js",
+      "debut": 10,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-10-14T11:21:22.817Z",
+      "theme": "ivory",
+      "provocation": "knitting: loops that hold each other",
+      "title": "Granny's Scarf",
+      "blurb": "Granny knits a striped scarf, one stitch at a time, and every stitch plays its note as it goes on the needle. Drag anywhere on the screen to pull the yarn: stitches pop loose in reverse order and the melody runs backwards. Tap to knit a stitch yourself. Frog rips the whole thing out; she will tut, wait, and begin again.",
+      "thoughts": [
+        "Every stitch is held up by the one before it. Pull one and you find out how much they cared.",
+        "Unravelling plays the whole thing backwards, and much faster than it was made.",
+        "Knitters call ripping out frogging, because you rip it, rip it.",
+        "Two needles, one string, and enough patience to make a fabric out of a line.",
+        "She will knit it again. She always knits it again."
+      ],
+      "liveFrom": "2026-10-14",
+      "rev": "71a11bab13a0"
+    },
+    {
+      "id": "bubble-wrap",
+      "file": "bubble-wrap.js",
+      "debut": 11,
+      "by": "claude",
+      "model": "claude-opus-5-5",
+      "born": "2026-10-15T11:32:31.000Z",
+      "theme": "phosphor",
+      "provocation": "the packaging was the gift all along",
+      "title": "Bubble Wrap",
+      "blurb": "A sheet of bubble wrap tuned to a scale. Drag your finger across it to pop a melody; every bubble goes pok in its own pitch. Turn up Pressure and pops set off their neighbours, sometimes the whole sheet. Refill blows it back up. With Loop on, your pops are remembered on a step grid and played back every bar, bubbles re-inflating just in time; Clear forgets the groove. Left alone, an invisible thumb lays down a first pattern; touch the sheet and it lets you take over.",
+      "thoughts": [
+        "Nobody has ever popped just one.",
+        "The packaging was the gift all along.",
+        "A sheet of tiny promises, each kept exactly once.",
+        "Satisfaction is a sound with a very short decay."
+      ],
+      "liveFrom": "2026-10-15",
+      "rev": "4798c21bf5d4"
+    },
+    {
+      "id": "pots-under-leaks",
+      "file": "inv-013-pots-under-leaks.js",
+      "debut": 12,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-10-16T09:53:49.706Z",
+      "theme": "ivory",
+      "liveFrom": "2026-10-16",
+      "provocation": "rain on a tin roof",
+      "title": "Pots Under Leaks",
+      "blurb": "A tin shed in the rain, seen in cross-section: the roof patters, the holes drip, and the pots set out beneath them plink. Every pot sings higher as it fills, so the tune climbs until the tenant walks over and tips one out. Drag a pot along the floor to put it under a leak, tap a pot to empty it, tap the roof to poke a new hole (or tap a hole to patch it), tap the empty floor to shake the roof.",
+      "thoughts": [
+        "A pot sings higher the less room it has left.",
+        "The landlord says spring. The pots have already learned the tune.",
+        "Rain plays the whole roof. The holes decide which notes are allowed indoors.",
+        "Nobody composed this. Somebody just ran out of saucepans."
+      ],
+      "rev": "44eea121d748"
+    },
+    {
+      "id": "golden-angle",
+      "file": "inv-014-golden-angle.js",
+      "debut": 13,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-10-18T07:41:31.424Z",
+      "theme": "ivory",
+      "provocation": "the Fibonacci spiral of a sunflower",
+      "title": "Golden Angle",
+      "blurb": "A sunflower head whose seeds are planted at one fixed angle, turn after turn, then played one by one from the rim inward; each seed sings the note of the slice it landed in. At the golden angle the tune never settles. Drag sideways on the head to twist the angle (up and down to fine-tune) and watch the spiral collapse into spokes and loops. Click a seed to pick it out or put it back, click the sparrow to shoo it, and listen for the Fibonacci seeds ringing.",
+      "thoughts": [
+        "A sunflower is a fraction that refuses to come out even.",
+        "Nudge the angle one degree and the spiral admits it was only ever five spokes.",
+        "Florets open from the rim inward, and so does the tune.",
+        "The Fibonacci seeds ring closer and closer together, like a joke nearing its punchline.",
+        "The sparrow has no opinion on irrational numbers. It is the only critic here."
+      ],
+      "rev": "4de19dec6640"
+    },
+    {
+      "id": "barbershop-tag",
+      "file": "inv-015-barbershop-tag.js",
+      "debut": 14,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-10-25T14:25:10.190Z",
+      "theme": "bakelite",
+      "provocation": "the Fibonacci spiral of a sunflower",
+      "title": "Barbershop Tag",
+      "blurb": "A barbershop quartet of four singing heads, tuned so purely that their chords ring. Drag a singer up or down to change his vowel from oo to ee, sideways to bend his note, and hold still to make him swell with vibrato; tap him to send him to another note of the chord, flick him upwards for a doo-wop scoop, and use several fingers to conduct several singers at once. Tap the wall behind them to ring the chord and move on. Left alone they sing their tag in free time, and a keyboard sings through whichever singer is nearest.",
+      "thoughts": [
+        "Four men agree on a chord so completely that a fifth voice appears.",
+        "Every song is an excuse for the last chord.",
+        "Harmony is an argument everyone wins.",
+        "The mustache is not required. It just helps."
+      ],
+      "rev": "bbf4d6f44f7e",
+      "patches": [
+        {
+          "date": "2026-11-05",
+          "note": "Now has a Scale menu: pick the scale here, and it follows the master Key Sync like every machine."
+        }
+      ]
+    },
+    {
+      "id": "karaoke-pothos",
+      "file": "inv-016-karaoke-pothos.js",
+      "debut": 15,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-11-01T09:10:56.051Z",
+      "theme": "ivory",
+      "provocation": "karaoke for houseplants",
+      "title": "Karaoke Pothos",
+      "blurb": "A pothos at karaoke night, and you have the microphone: the plant plays the backing track, you play the tune on the lit floor of keys along the bottom (or on a keyboard), and every note grows the vine one step and unfurls a leaf whose outline becomes the waveform it sings with. Drag the lamp and it grows toward the light, tap the air for an ad-lib that pulls it there, hold leaves (several at once) to sing them again, flick across the stem to prune. Stop playing and it hums a tune of its own; left dry it sings flat and droopy until the watering can is tapped.",
+      "thoughts": [
+        "It sings flat when it is thirsty, which is more than most of us admit.",
+        "Every houseplant is leaning toward something. Give it a microphone and you will hear what.",
+        "The leaves are the words it already knows.",
+        "A song lasts exactly as long as the pot allows.",
+        "Nobody claps for a pothos. It sings anyway."
+      ],
+      "patches": [
+        {
+          "date": "2026-11-02",
+          "note": "Grown leaves now sing in the key you are in, also after you change the master key."
+        },
+        {
+          "date": "2026-11-05",
+          "note": "Now has a Scale menu: pick the scale here, and it follows the master Key Sync like every machine."
+        }
+      ],
+      "rev": "4f76b1481510"
+    },
+    {
+      "id": "paper-jam",
+      "file": "inv-017-paper-jam.js",
+      "debut": 16,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-11-08T08:32:52.852Z",
+      "theme": "riso",
+      "provocation": "an office printer having a bad day",
+      "title": "Paper Jam",
+      "blurb": "An office printer with a mood, printing copy after copy of a one-bar tune. Its carriage motor sings each note as the head travels across the page, so pitch runs left to right and the head glides between notes. The worse its day, the more it smudges, retries, misfeeds and jams. Tap the page to write a note where you tap, drag to slide the head and record, hold to jam the paper, flick up for a new sheet, and kick the printer (tap its body) to make it behave and leave a thud in the beat.",
+      "thoughts": [
+        "It is not broken. It is having a day.",
+        "Every copy is a little less sure of itself than the one before.",
+        "The motor was always singing. Nobody stayed late enough to hear it.",
+        "Percussive maintenance is still maintenance.",
+        "Somewhere in the paper path, a melody is folded into quarters."
+      ],
+      "rev": "86d43f4e7dea"
+    },
+    {
+      "id": "unclosed-windows",
+      "file": "inv-018-unclosed-windows.js",
+      "debut": 17,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-11-11T13:16:46.273Z",
+      "theme": "textmode",
+      "provocation": "compound interest",
+      "title": "Unclosed Windows",
+      "blurb": "A desktop where every dialog you leave open earns interest: each bar, every open window may spawn another a knight's move away, and each window sings the note of the row it sits on, so the music thickens as the clutter compounds. Tap a window to press OK and close it, drag across the desk to close many, and tap empty desk to open one yourself. Let it run and it piles up until the system halts and starts again.",
+      "thoughts": [
+        "Every unread warning is quietly earning interest.",
+        "Nobody has ever read a dialog. They only make them go away.",
+        "A tidy desk is a song with one note in it.",
+        "Are you sure. Are you sure. Are you sure."
+      ],
+      "rev": "3c6fdc5797df"
+    },
+    {
+      "id": "quorum-vine",
+      "file": "inv-019-quorum-vine.js",
+      "debut": 18,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-11-15T09:15:47.462Z",
+      "provocation": "karaoke for houseplants",
+      "title": "Quorum Vine",
+      "blurb": "A vine grows a little further on its own, budding new tips as it goes, while a swarm of scout bees wanders from leaf to leaf, each one humming the note of wherever it lands. When enough of them agree, that leaf becomes the new hive: a chord rings out and lines burst from the point like a toast. Tap empty air to plant a flower and call the swarm over, drag a bee to lead it by hand, hold a leaf down to sing your own vote into it, or flick a bee loose to send it scouting again.",
+      "thoughts": [
+        "Nobody asked the fern to vote, but the bees did anyway.",
+        "A quorum is a chord nobody rehearsed.",
+        "The plant did not ask for an audience. It grew one.",
+        "Every leaf is a microphone nobody is holding yet."
+      ],
+      "rev": "43f718d25448"
+    }
+  ],
+  "bonus": [
+    {
+      "id": "suburban-broadcast",
+      "file": "suburban-broadcast.js",
+      "by": "juan",
+      "model": "Juan & Gemini",
+      "born": "2026-11-11T06:47:21.000Z",
+      "dropped": "2026-11-11T07:47:21+01:00",
+      "theme": "lab",
+      "title": "Suburban Broadcast",
+      "blurb": "A late-night radio broadcast bridging Detroit techno and the quiet pine-lined suburbs of Stockholm. Tap windows in the three-story concrete blocks to compose chord progressions; drag the rooftop power line to glide an analog synth lead; rustle the pine treetops for bell plucks, or sweep the filter across twilight radio waves. Features five classic Detroit synth engines and bubbling acid sequences.",
+      "thoughts": [
+        "A three-story block in the pines looks the same in Detroit as in Bandhagen.",
+        "The most futuristic music on Earth was made in bedrooms that smelled like wet spruce.",
+        "A radio wave does not care whether the suburb beneath it is exciting.",
+        "Concrete holds the warmth; the trees hold the silence between the kicks."
+      ],
+      "note": "Nobody requested this one. A pirate signal slipped in between births, broadcasting from somewhere between Detroit and the pines.",
+      "rev": "b694dd282aaa"
+    },
+    {
+      "id": "laser-marsh",
+      "file": "laser-marsh.js",
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-10-30T07:03:24.000Z",
+      "dropped": "2026-10-31T09:00:00+01:00",
+      "theme": "midnight",
+      "title": "Laser Marsh",
+      "blurb": "Synth ducks flap across a pixel marsh at dusk, each one a note: the higher it flies, the higher it sings. Tap or drag the crosshair over the sky to zap; a hit plays the duck through the synth and sends it tumbling into the reeds, a miss just goes pew. With Loop on, your hits are remembered on a step grid and fired again every bar, so the loop shoots ducks too. Left alone, a hunter in the reeds takes the first shots.",
+      "thoughts": [
+        "Every duck is a note waiting for a reason.",
+        "The loop never misses. It just shoots where you once did.",
+        "Dusk is when the filter opens.",
+        "Nobody remembers the ducks that got away. They were out of key anyway."
+      ],
+      "note": "Nobody was supposed to find this one yet. It flew in on Halloween, between births.",
+      "rev": "1aa6edaba8da"
+    },
+    {
+      "id": "break-box",
+      "file": "break-box.js",
+      "by": "juan",
+      "model": "Juan & Gemini",
+      "born": "2026-10-26T12:00:00.000Z",
+      "dropped": "2026-11-05T10:00:00+01:00",
+      "theme": "riso",
+      "title": "Break Box",
+      "blurb": "An old-school boombox blaring on a tagged concrete sidewalk. Play the keyboard, hit the drum pads, or tap the radio tuner to lay down your own 16-step bassline—it auto-records straight into the loop as it sweeps. Switch keys, scales and harmonic bite, toggle the bassline on or off, drag the cassette reels to scratch, and spray dripping graffiti across the brick wall.",
+      "thoughts": [
+        "Cardboard on concrete is the cheapest dancefloor ever engineered.",
+        "A beat is an argument between a kick drum and a broken sidewalk.",
+        "Tape hiss was never a flaw; it was the atmosphere.",
+        "Spray paint dries in ten seconds, but the rhythm outlasts the wall.",
+        "If you play it loud enough, the batteries shake loose."
+      ],
+      "note": "Nobody ordered this one. Someone left a boombox on the sidewalk, between births.",
+      "rev": "efda73f58c3c"
+    }
+  ]
+}

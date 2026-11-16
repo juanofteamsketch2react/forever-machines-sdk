@@ -14,7 +14,7 @@ On the web, use the JavaScript SDK instead: `npm install @forevermachines/sdk` (
 In Xcode: File → Add Package Dependencies → `https://github.com/juanofteamsketch2react/forever-machines-sdk`. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.2.3")
+.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.3.0")
 ```
 
 ```swift
@@ -44,7 +44,7 @@ dependencyResolutionManagement {
 }
 ```
 
-In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.2.3")`
+In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.3.0")`
 
 ```kotlin
 import net.forevermachines.sdk.FMSession
@@ -64,7 +64,10 @@ Android 8+ (API 26), arm64, armv7 and x86_64.
 
 | | |
 |---|---|
-| `mount(name)` | A machine: bundled (`slow-tide`, `night-choir`, `seven-bowls`, `lotus-pond`, `rain-window`, `long-breath`) or from the collection. Also from a URL or from source. |
+| `mount(name)` | A machine: bundled (`slow-tide`, `night-choir`, `seven-bowls`, `lotus-pond`, `rain-window`, `long-breath`) or a species of the collection (`loom`). Also from a URL or from source. `skin:` a skin's name or a whole skin as JSON. |
+| `mount(number:)` (iOS) / `mountNumber(n)` (Android) | No. N of the collection exactly as the site plays it: its species, seed, skin and name (a bonus machine: 501 and up). Each machine's placard on the site has the line. |
+| `catalog()` | Every machine born so far, as the site numbers them: number, no, name, species, seed, skin, blurb, thought. Computed by the site's own catalog code. |
+| `effects()`, `mount(…, effect:, effectMix:)`, `machine.effect(id, mix)`, `effectMix(v)` | The Forever Effects: any of them inside any machine, on or off while it plays. |
 | `power(on)` | All machines on or off. |
 | `windDown(minutes)` / `cancelWindDown()` | Ends the music by itself in about that many minutes (never exactly, never twice alike). `onWind` reports it. |
 | `drift(on)` | The first smooth knobs wander slowly. |
@@ -74,6 +77,7 @@ Android 8+ (API 26), arm64, armv7 and x86_64.
 | `machine.note(n, velocity, on)` | A MIDI note, answered in the machine's own voice. |
 | `machine.level` | The output level, for a meter. |
 | `machine.screenImage()` / `screenBitmap()`, `pointer(…)`, `fitScreen(w, h)` | The machine's own screen, to show and play: `fitScreen` lays it out at your view's size (tall or wide) and the machine redraws to fill it. |
+| `machine.colors` | The skin's colours by role (dev, head, line, ink, dim, accent, accent2, track, field, screen …): dress your own panel in the machine's look, as the demo apps do. |
 
 Machines that read the weather ask Open-Meteo for a city guessed from the time zone (no location permission). Turn the
 network off with `network = false` in the options.
@@ -81,8 +85,9 @@ network off with `network = false` in the options.
 ## Demo apps
 
 `Examples/SleepDemo` (iOS, SwiftUI: `xcodegen generate` in that folder, then open the project) and `Examples/android-demo`
-(`./gradlew :app:installDebug`): the six places as tiles, play and wind down, the machine's screen played with a finger, and
-every control in the machine's own sections.
+(`./gradlew :app:installDebug`): the sleep page of forevermachines.net as an app. The six places of the retreat with their
+Blender stills and lanterns that follow the music, the machine's own device in its skin with the kit's dials, its tall screen
+played with a finger, play and wind down.
 
 ## License
 
