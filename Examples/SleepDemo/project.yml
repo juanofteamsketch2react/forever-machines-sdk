@@ -1,0 +1,25 @@
+name: SleepDemo
+options:
+  bundleIdPrefix: net.forevermachines
+  deploymentTarget:
+    iOS: "16.0"
+packages:
+  ForeverMachines:
+    path: ../..
+targets:
+  SleepDemo:
+    type: application
+    platform: iOS
+    sources: [SleepDemo]
+    dependencies:
+      - package: ForeverMachines
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIBackgroundModes: audio
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Sleep Demo
+        PRODUCT_BUNDLE_IDENTIFIER: net.forevermachines.sleepdemo
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_STYLE: Automatic

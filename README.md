@@ -14,7 +14,7 @@ On the web, use the JavaScript SDK instead: `npm install @forevermachines/sdk` (
 In Xcode: File → Add Package Dependencies → `https://github.com/juanofteamsketch2react/forever-machines-sdk`. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.2.0")
+.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.2.1")
 ```
 
 ```swift
@@ -44,7 +44,7 @@ dependencyResolutionManagement {
 }
 ```
 
-In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.2.0")`
+In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.2.1")`
 
 ```kotlin
 import net.forevermachines.sdk.FMSession
@@ -69,13 +69,20 @@ Android 8+ (API 26), arm64, armv7 and x86_64.
 | `windDown(minutes)` / `cancelWindDown()` | Ends the music by itself in about that many minutes (never exactly, never twice alike). `onWind` reports it. |
 | `drift(on)` | The first smooth knobs wander slowly. |
 | `tempo(bpm)` | A shared tempo for the machines that follow one. |
-| `machine.macro(n, v)`, `macros()`, `controls()`, `set(key, v)` | The machine's knobs. Macro 1–8 are the same as in Ableton Live and the web SDK. |
+| `machine.controls()`, `set(key, v)`, `press(key)` | Every control, with its section, kind (knob, toggle, select, button, readout), value, text and a menu's options: enough to draw the machine's own panel. |
+| `machine.macro(n, v)`, `macros()` | Macro 1–8: the first eight knobs, the same as in Ableton Live and the web SDK. |
 | `machine.note(n, velocity, on)` | A MIDI note, answered in the machine's own voice. |
 | `machine.level` | The output level, for a meter. |
 | `machine.screenImage()` / `screenBitmap()`, `pointer(…)` | The machine's own screen, to show and play if you want the device. |
 
 Machines that read the weather ask Open-Meteo for a city guessed from the time zone (no location permission). Turn the
 network off with `network = false` in the options.
+
+## Demo apps
+
+`Examples/SleepDemo` (iOS, SwiftUI: `xcodegen generate` in that folder, then open the project) and `Examples/android-demo`
+(`./gradlew :app:installDebug`): the six places as tiles, play and wind down, the machine's screen played with a finger, and
+every control in the machine's own sections.
 
 ## License
 

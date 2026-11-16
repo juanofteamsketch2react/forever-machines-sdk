@@ -32,7 +32,10 @@ public enum FMError: Error, LocalizedError {
 public struct FMControl: Sendable, Hashable {
     public let key: String, label: String, kind: String, section: String
     public let value: Double
+    /// What it shows: a knob's value with its unit, a switch's state, a menu's choice, a readout.
     public let text: String?
+    /// A menu's choices, in order (set it with v = index / (count - 1)).
+    public let options: [String]
 }
 
 @MainActor
@@ -197,7 +200,7 @@ public final class FMMachine {
         return list.compactMap { c in
             guard let key = c["key"] as? String, let kind = c["kind"] as? String else { return nil }
             return FMControl(key: key, label: c["label"] as? String ?? "", kind: kind, section: c["sec"] as? String ?? "",
-                             value: c["v"] as? Double ?? 0, text: c["text"] as? String)
+                             value: c["v"] as? Double ?? 0, text: c["text"] as? String, options: c["options"] as? [String] ?? [])
         }
     }
 
@@ -221,6 +224,12 @@ public final class FMMachine {
     public func set(_ key: String, _ v: Double) {
         let k = String(data: try! JSONSerialization.data(withJSONObject: [key], options: [.fragmentsAllowed]), encoding: .utf8)!.dropFirst().dropLast()
         post(#"{"fm":"cc","key":\#(k),"v":\#(min(1, max(0, v)))}"#)
+    }
+
+    /// Presses one of the machine's buttons (kind "button"), by its key.
+    public func press(_ key: String) {
+        let k = String(data: try! JSONSerialization.data(withJSONObject: [key], options: [.fragmentsAllowed]), encoding: .utf8)!.dropFirst().dropLast()
+        post(#"{"fm":"press","key":\#(k)}"#)
     }
 
     /// A MIDI note, answered in the machine's own voice.
