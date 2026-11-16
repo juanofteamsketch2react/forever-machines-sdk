@@ -14,7 +14,7 @@ On the web, use the JavaScript SDK instead: `npm install @forevermachines/sdk` (
 In Xcode: File → Add Package Dependencies → `https://github.com/juanofteamsketch2react/forever-machines-sdk`. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.2.1")
+.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.2.2")
 ```
 
 ```swift
@@ -44,7 +44,7 @@ dependencyResolutionManagement {
 }
 ```
 
-In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.2.1")`
+In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.2.2")`
 
 ```kotlin
 import net.forevermachines.sdk.FMSession
@@ -73,7 +73,7 @@ Android 8+ (API 26), arm64, armv7 and x86_64.
 | `machine.macro(n, v)`, `macros()` | Macro 1–8: the first eight knobs, the same as in Ableton Live and the web SDK. |
 | `machine.note(n, velocity, on)` | A MIDI note, answered in the machine's own voice. |
 | `machine.level` | The output level, for a meter. |
-| `machine.screenImage()` / `screenBitmap()`, `pointer(…)` | The machine's own screen, to show and play if you want the device. |
+| `machine.screenImage()` / `screenBitmap()`, `pointer(…)`, `fitScreen(w, h)` | The machine's own screen, to show and play: `fitScreen` lays it out at your view's size (tall or wide) and the machine redraws to fill it. |
 
 Machines that read the weather ask Open-Meteo for a city guessed from the time zone (no location permission). Turn the
 network off with `network = false` in the options.

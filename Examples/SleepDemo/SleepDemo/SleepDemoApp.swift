@@ -20,6 +20,11 @@ final class Player: ObservableObject {
     @Published var wind = WindState()
     @Published var error: String?
     var editing: String?   // the control a finger is on: not refreshed under it
+    private var box = CGSize.zero
+    func fit(_ size: CGSize) {
+        box = size
+        if size.width > 10 { machine?.fitScreen(width: size.width, height: size.height) }
+    }
     static let places: [(id: String, name: String, where_: String)] = [
         ("slow-tide", "Slow Tide", "The beach"), ("night-choir", "Night Choir", "The sala"), ("seven-bowls", "Seven Bowls", "The table"),
         ("lotus-pond", "Lotus Pond", "The pond"), ("rain-window", "Rain Window", "The hut"), ("long-breath", "Long Breath", "The lookout"),
@@ -52,6 +57,7 @@ final class Player: ObservableObject {
         controls = []
         do {
             machine = try await fm.mount(name)
+            fit(box)
             controls = machine?.controls().filter { $0.kind != "steps" } ?? []
             if ProcessInfo.processInfo.arguments.contains("-autoplay") { try fm.power(true) }
         } catch { self.error = error.localizedDescription }
@@ -113,24 +119,32 @@ struct ContentView: View {
     }
 
     // the machine's own screen: drawn by it, and played with a finger
-    @ViewBuilder var screen: some View {
-        if let img = p.picture, let m = p.machine {
-            GeometryReader { g in
-                Image(decorative: img, scale: 2).resizable().scaledToFit()
-                    .frame(width: g.size.width, height: g.size.height)
-                    .gesture(DragGesture(minimumDistance: 0)
-                        .onChanged { v in
-                            let s = m.screenSize, k = s.width / g.size.width
-                            m.pointer(v.translation == .zero ? "pointerdown" : "pointermove", x: v.location.x * k, y: v.location.y * k, down: true)
-                        }
-                        .onEnded { v in
-                            let k = m.screenSize.width / g.size.width
-                            m.pointer("pointerup", x: v.location.x * k, y: v.location.y * k, down: false)
-                        })
+    // tall: the machine lays its own screen out to fill the box (fitScreen), so there is plenty to touch
+    var screen: some View {
+        GeometryReader { g in
+            ZStack {
+                Color.black.opacity(0.4)
+                if let img = p.picture { Image(decorative: img, scale: 2).resizable().scaledToFill() }
             }
-            .aspectRatio(CGFloat(img.width) / CGFloat(max(1, img.height)), contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .frame(width: g.size.width, height: g.size.height)
+            .clipped()
+            .contentShape(Rectangle())
+            .gesture(DragGesture(minimumDistance: 0)
+                .onChanged { v in
+                    guard let m = p.machine else { return }
+                    let k = m.screenSize.width > 0 ? m.screenSize.width / g.size.width : 1
+                    m.pointer(v.translation == .zero ? "pointerdown" : "pointermove", x: v.location.x * k, y: v.location.y * k, down: true)
+                }
+                .onEnded { v in
+                    guard let m = p.machine else { return }
+                    let k = m.screenSize.width > 0 ? m.screenSize.width / g.size.width : 1
+                    m.pointer("pointerup", x: v.location.x * k, y: v.location.y * k, down: false)
+                })
+            .onAppear { p.fit(g.size) }
+            .onChange(of: g.size) { s in p.fit(s) }
         }
+        .aspectRatio(3 / 4, contentMode: .fit)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 

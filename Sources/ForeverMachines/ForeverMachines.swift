@@ -237,6 +237,11 @@ public final class FMMachine {
 
     /// The machine's screen as last drawn, for a device view of your own (nil until it has one). Size in points: screenSize.
     public func screenImage() -> CGImage? { core.copyScreenImage() }
+    /// Lays the machine's screen out at this size, in points: the machines that can (all six sleep machines) redraw to
+    /// fill it, tall or wide, instead of keeping their own proportions. Call it again when your view changes size.
+    public func fitScreen(width: Double, height: Double) {
+        post(#"{"fm":"focus","mode":"screen","fill":{"w":\#(Int(width)),"h":\#(Int(height))}}"#)
+    }
     public var screenSize: CGSize { core.screenSize }
     /// A touch on the screen, in its points: "pointerdown", "pointermove", "pointerup".
     public func pointer(_ type: String, x: Double, y: Double, down: Bool) { core.pointer(type, x: x, y: y, buttons: down ? 1 : 0) }

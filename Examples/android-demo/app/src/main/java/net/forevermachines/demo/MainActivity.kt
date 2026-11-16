@@ -46,7 +46,14 @@ class MainActivity : Activity() {
         super.onCreate(state)
         fm = FMSession(this)
         val dp = resources.displayMetrics.density
-        picture = ImageView(this).apply { adjustViewBounds = true }
+        // tall: the machine lays its own screen out to fill the box (fitScreen), so there is plenty to touch
+        picture = object : ImageView(this) {
+            override fun onMeasure(w: Int, h: Int) {
+                val width = MeasureSpec.getSize(w)
+                setMeasuredDimension(width, width * 4 / 3)
+            }
+            override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) { super.onSizeChanged(w, h, ow, oh); fit() }
+        }.apply { scaleType = ImageView.ScaleType.CENTER_CROP; clipToOutline = true }
         play = Button(this)
         val wind = Button(this).apply { text = "Wind down in 1 min" }
         meter = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply { max = 100 }
@@ -88,6 +95,11 @@ class MainActivity : Activity() {
         main.post(ticker)
     }
 
+    private fun fit() {
+        val d = resources.displayMetrics.density
+        if (picture.width > 10) machine?.fitScreen(picture.width / d, picture.height / d)
+    }
+
     private var current = ""
     private fun use(name: String, autoplay: Boolean = false) {
         if (name == current) return
@@ -100,6 +112,7 @@ class MainActivity : Activity() {
             val list = m.controls()
             main.post {
                 machine = m
+                fit()
                 build(m, list)
                 if (autoplay) { fm.power(true); play.text = "Pause" }
             }
