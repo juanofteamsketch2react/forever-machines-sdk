@@ -88,5 +88,16 @@ window.FM_THEMES = (function () {
     return { name: 'mutant-' + h, label: 'Mutant ' + h + '°', vars: v };
   }
 
-  return { curated, mutant, byName: Object.fromEntries(curated.map((t) => [t.name, t])) };
+  // skins a visitor can pick but no machine is dealt at random (so seeded mutations keep their looks)
+  const extra = [
+    // a tower block: a poured-concrete case, a screen in the dark gloss green of council stairwell paint, lit by a sodium lamp, with hi-vis yellow
+    T('council', 'Council', {
+      page: '#24251f', 'page-ink': '#e4dfcf', dev: '#a8a59b', head: '#b4b1a6', line: '#8b887e', ink: '#1c1d1a', dim: '#55544c',
+      accent: '#ff8a1c', accent2: '#2f5d4a', 'accent-ink': '#1c1d1a', track: '#7d7a70', field: '#cbc8bc', 'field-ink': '#1c1d1a',
+      screen: '#12231c', 'screen-ink': '#ffb35c', 'screen-alt': '#f2df4a', 'screen-dim': '#2c4a3d',
+    }),
+  ];
+  const all = curated.concat(extra);
+
+  return { curated, extra, all, mutant, byName: Object.fromEntries(all.map((t) => [t.name, t])) };
 })();

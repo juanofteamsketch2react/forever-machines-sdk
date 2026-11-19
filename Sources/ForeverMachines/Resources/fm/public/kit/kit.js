@@ -535,6 +535,210 @@
       src.onended = cleanup;
     };
 
+    // ── computer voices (No. 018 Unclosed Windows): one-shots like m.tone ──
+    const deskShot = (kind, o, make) => {
+      if (!m.on || thin()) return;
+      heard(kind, o);
+      const t = T(o.t), f = FM.clamp(fin(o.freq, 440), 20, 8000), g = FM.clamp(fin(o.gain, 0.12), 0, 0.6), d = FM.clamp(fin(o.d, 0.3), 0.02, 4);
+      const e = ac.createGain(); e.gain.value = 0;
+      const { srcs, end } = make(t, f, g, d, e);
+      const cleanup = route(e, o);
+      srcs.forEach((x) => { x.start(t); x.stop(end); });
+      srcs[0].onended = cleanup;
+    };
+    m.beep = (o = {}) => deskShot('beep', o, (t, f, g, d, e) => {   // a PC speaker: a square, gated, never faded
+      const s = ac.createOscillator(); s.type = 'square'; s.frequency.value = f;
+      const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = Math.min(9000, f * 6);
+      const hold = Math.max(0.03, d * 0.55);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g * 0.6, t + 0.002);
+      e.gain.setValueAtTime(g * 0.6, t + hold); e.gain.linearRampToValueAtTime(0, t + hold + 0.012);
+      s.connect(lp); lp.connect(e);
+      return { srcs: [s], end: t + hold + 0.05 };
+    });
+    m.modem = (o = {}) => deskShot('modem', o, (t, f, g, d, e) => {   // a chirp up an octave into the note, ring-modulated at 1.5×
+      const car = ac.createOscillator(); car.type = 'triangle';
+      car.frequency.setValueAtTime(f * 0.5, t); car.frequency.exponentialRampToValueAtTime(f, t + 0.03);
+      const mod = ac.createOscillator(); mod.frequency.value = f * fin(o.ratio, 1.5);
+      const ring = ac.createGain(); ring.gain.value = 0; mod.connect(ring.gain);
+      const dry = ac.createGain(); dry.gain.value = FM.clamp(fin(o.dry, 0.4), 0, 1);
+      car.connect(ring); car.connect(dry); ring.connect(e); dry.connect(e);
+      e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(g * 1.3 + 0.0002, t + 0.006); e.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      return { srcs: [car, mod], end: t + d + 0.05 };
+    });
+    m.buzz = (o = {}) => deskShot('buzz', o, (t, f, g, d, e) => {   // two saws a few cents apart, squeezed through a bandpass
+      const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = Math.min(8000, f * 2.2); bp.Q.value = fin(o.q, 2.5);
+      const c = fin(o.cents, 9);
+      const os = [-c, c].map((x) => { const s = ac.createOscillator(); s.type = 'sawtooth'; s.frequency.value = f; s.detune.value = x; s.connect(bp); return s; });
+      bp.connect(e);
+      e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(g + 0.0002, t + 0.01); e.gain.exponentialRampToValueAtTime(0.0001, t + d * 1.2);
+      return { srcs: os, end: t + d * 1.2 + 0.05 };
+    });
+
+    // any outline (one period of heights, -1…1) as a timbre: its first harmonics (No. 016 Karaoke Pothos)
+    m.shapeWave = (ys, harmonics = 12) => {
+      const N = Math.min(4096, (ys && ys.length) | 0), H = FM.clamp(fin(harmonics, 12) | 0, 1, 64);
+      const real = new Float32Array(H + 1), imag = new Float32Array(H + 1);
+      for (let k = 1; k <= H && N > 1; k++) {
+        let a = 0, b = 0;
+        for (let n = 0; n < N; n++) { const y = fin(ys[n], 0), ph = (2 * Math.PI * k * n) / N; a += y * Math.cos(ph); b += y * Math.sin(ph); }
+        real[k] = (2 * a) / N; imag[k] = (2 * b) / N;
+      }
+      imag[1] += 0.15;   // never a wave without a fundamental
+      return ac.createPeriodicWave(real, imag);
+    };
+
+    // a held singing voice whose vowel slides oo → oh → ah → eh → ee (No. 015 Barbershop Tag). Silent until level() > 0.
+    const VOWELS = [[300, 870, 2240], [450, 800, 2830], [730, 1090, 2440], [530, 1840, 2480], [270, 2290, 3010]];
+    const FORM_Q = [8, 10, 13], FORM_G = [1, 0.5, 0.28];
+    let foldCurve = null;
+    const foldOf = () => foldCurve || (foldCurve = (() => { const n = 1024, c = new Float32Array(n); for (let i = 0; i < n; i++) { const x = (i / (n - 1)) * 2 - 1; c[i] = Math.sin(x * Math.PI * 1.6) * 0.85; } return c; })());
+    const LINEAR = new Float32Array([-1, 1]);
+    m.singer = (o = {}) => {
+      const osc = ac.createOscillator(); osc.type = o.wave || 'sawtooth'; osc.frequency.value = FM.clamp(fin(o.freq, 110), 30, 4000);
+      const lfo = ac.createOscillator(); lfo.frequency.value = 5;
+      const vib = ac.createGain(); vib.gain.value = 0; lfo.connect(vib); vib.connect(osc.frequency);
+      const shaper = ac.createWaveShaper(); shaper.curve = o.fold ? foldOf() : LINEAR;
+      const nz = ac.createBufferSource(); nz.buffer = noiseBuf; nz.loop = true;
+      const breath = ac.createGain(); breath.gain.value = 0;
+      const pre = ac.createGain();
+      osc.connect(shaper); shaper.connect(pre); nz.connect(breath); breath.connect(pre);
+      const sum = ac.createGain(); sum.gain.value = 2.6;
+      const bands = FORM_Q.map((q, k) => {
+        const b = ac.createBiquadFilter(); b.type = 'bandpass'; b.frequency.value = VOWELS[2][k]; b.Q.value = q;
+        const gn = ac.createGain(); gn.gain.value = FORM_G[k];
+        pre.connect(b); b.connect(gn); gn.connect(sum);
+        return { b, gn };
+      });
+      const direct = ac.createGain(); direct.gain.value = 0; pre.connect(direct); direct.connect(sum);
+      const amp = ac.createGain(); amp.gain.value = 0;
+      const ring = ac.createGain(); ring.gain.value = 1;
+      const ringOsc = ac.createOscillator(); ringOsc.frequency.value = 60;
+      const ringDepth = ac.createGain(); ringDepth.gain.value = 0; ringOsc.connect(ringDepth); ringDepth.connect(ring.gain);
+      const pan = ac.createStereoPanner();
+      const send = ac.createGain(); send.gain.value = FM.clamp(fin(o.send, 0.3), 0, 1);
+      sum.connect(amp); amp.connect(ring); ring.connect(pan); pan.connect(o.dest || out); pan.connect(send); send.connect(verbIn);
+      osc.start(); lfo.start(); nz.start(0, Math.random() * 1.5); ringOsc.start();
+      const last = {};
+      const set = (key, param, v, tc) => {
+        if (!isFinite(v)) return;
+        const p = last[key];
+        if (p !== undefined && Math.abs(p - v) <= Math.abs(v) * 0.0015 + 1e-5) return;
+        last[key] = v; param.setTargetAtTime(v, ac.currentTime, Math.max(0.004, tc));
+      };
+      let wave = osc.type, folded = !!o.fold, stopped = false;
+      const v = {
+        pitch(f, glide = 0.05) { set('f', osc.frequency, FM.clamp(f, 30, 4000), fin(glide, 0.05) / 3); return v; },
+        // x 0…1 (oo, oh, ah, eh, ee); scale moves every formant (1.3 a child, 0.9 a bass); formant/direct: how much is sung, how much is the bare source
+        vowel(x, scale = 1, formant = 1, directGain = 0) {
+          const p = FM.clamp(fin(x, 0.5), 0, 1) * 4, i = Math.min(3, Math.floor(p)), t = p - i, sc = fin(scale, 1);
+          for (let k = 0; k < 3; k++) {
+            set('b' + k, bands[k].b.frequency, FM.clamp((VOWELS[i][k] + (VOWELS[i + 1][k] - VOWELS[i][k]) * t) * sc, 80, 9000), 0.04);
+            set('g' + k, bands[k].gn.gain, FORM_G[k] * fin(formant, 1), 0.05);
+          }
+          set('d', direct.gain, fin(directGain, 0), 0.05); return v;
+        },
+        level(x, tc = 0.05) { set('a', amp.gain, FM.clamp(fin(x, 0), 0, 0.6), fin(tc, 0.05)); return v; },
+        vibrato(depthHz, rate = 5) { set('vd', vib.gain, FM.clamp(fin(depthHz, 0), 0, 60), 0.12); set('vr', lfo.frequency, FM.clamp(fin(rate, 5), 0.5, 9), 0.3); return v; },
+        breath(x) { set('br', breath.gain, FM.clamp(fin(x, 0), 0, 0.5), 0.1); return v; },
+        ring(depth, hz = 60) { const d = FM.clamp(fin(depth, 0), 0, 1); set('rd', ringDepth.gain, d, 0.05); set('rb', ring.gain, 1 - d, 0.05); set('rf', ringOsc.frequency, FM.clamp(fin(hz, 60), 5, 400), 0.1); return v; },
+        wave(type, fold) {
+          if (type && type !== wave) { wave = type; osc.type = type; }
+          if (fold != null && !!fold !== folded) { folded = !!fold; shaper.curve = folded ? foldOf() : LINEAR; }
+          return v;
+        },
+        pan(p) { set('p', pan.pan, FM.clamp(fin(p, 0), -1, 1), 0.1); return v; },
+        send(x) { set('s', send.gain, FM.clamp(fin(x, 0), 0, 1), 0.1); return v; },
+        stop() { if (stopped) return; stopped = true; amp.gain.setTargetAtTime(0, ac.currentTime, 0.03); const at = ac.currentTime + 0.2; for (const s of [osc, lfo, nz, ringOsc]) s.stop(at); osc.onended = () => { try { pan.disconnect(); send.disconnect(); } catch (_) {} }; },
+      };
+      v.vowel(fin(o.vowel, 0.5), fin(o.scale, 1)).vibrato(fin(o.vibrato, 0)).breath(fin(o.breath, 0.04)).pan(fin(o.pan, 0));
+      return v;
+    };
+
+    // a gliding mono voice: ring-modulated at a ratio of its pitch, wavefolded, filtered (No. 017 Ring Carriage).
+    // Every pitch change glides, like a printer carriage travelling.
+    m.carriage = (o = {}) => {
+      const a = ac.createOscillator(), b = ac.createOscillator(), r = ac.createOscillator();
+      const bG = ac.createGain(); bG.gain.value = 0;
+      const ring = ac.createGain(); ring.gain.value = 1;
+      const rD = ac.createGain(); rD.gain.value = 0;
+      const pre = ac.createGain(); pre.gain.value = 0.2;
+      const sh = ac.createWaveShaper();
+      const curve = new Float32Array(1024);
+      for (let i = 0; i < 1024; i++) { const x = (i / 1023) * 2 - 1; curve[i] = Math.sin(x * Math.PI * 2.5) * 0.7; }
+      sh.curve = curve;
+      const filt = ac.createBiquadFilter();
+      const env = ac.createGain(); env.gain.value = 0;
+      const pan = ac.createStereoPanner();
+      a.connect(ring); b.connect(bG); bG.connect(ring); r.connect(rD); rD.connect(ring.gain);
+      ring.connect(pre); pre.connect(sh); sh.connect(filt); filt.connect(env);
+      const cleanup = route(env, { pan: 0, dest: pan, send: 0, echo: 0 });
+      pan.connect(o.dest || out);
+      const vS = ac.createGain(); vS.gain.value = FM.clamp(fin(o.send, 0.2), 0, 1); pan.connect(vS); vS.connect(verbIn);
+      const eS = ac.createGain(); eS.gain.value = FM.clamp(fin(o.echo, 0.1), 0, 1); pan.connect(eS); eS.connect(echoIn);
+      a.frequency.value = b.frequency.value = 220; r.frequency.value = 110;
+      a.start(); b.start(); r.start();
+      // wave, ring (its wave), ratio (or ratios to cycle, or hz: a fixed buzz), depth 0…1, drive (the fold) 0…1,
+      // twin (a detuned second oscillator 0…1) and detune (cents), filter, q, cut (× pitch), sweep, sustain, decay, gain
+      let P = null, nR = 0, stopped = false;
+      const c = {
+        set(p = {}) {
+          P = Object.assign({ wave: 'sawtooth', ring: 'sine', ratio: 1.5, depth: 0.6, drive: 0.25, twin: 0, detune: 7, filter: 'lowpass', q: 1, cut: 6, sweep: false, sustain: 0.5, decay: 0.15, gain: 1 }, P, p);
+          const t = ac.currentTime;
+          a.type = b.type = P.wave; r.type = P.ring;
+          b.detune.setTargetAtTime(fin(P.detune, 0), t, 0.01); bG.gain.setTargetAtTime(FM.clamp(fin(P.twin, 0), 0, 1), t, 0.01);
+          rD.gain.setTargetAtTime(FM.clamp(fin(P.depth, 0), 0, 1), t, 0.01); ring.gain.setTargetAtTime(1 - FM.clamp(fin(P.depth, 0), 0, 1), t, 0.01);
+          pre.gain.setTargetAtTime(FM.clamp(fin(P.drive, 0.2), 0.01, 1.5), t, 0.01);
+          filt.type = P.filter; filt.Q.setTargetAtTime(FM.clamp(fin(P.q, 1), 0.1, 30), t, 0.01);
+          return c;
+        },
+        glide(f, t, tau = 0.04, tone = 1) {
+          t = T(t); f = FM.clamp(fin(f, 220), 30, 5000); tau = Math.max(0.002, fin(tau, 0.04));
+          a.frequency.setTargetAtTime(f, t, tau); b.frequency.setTargetAtTime(f, t, tau);
+          const rf = P.hz || f * (Array.isArray(P.ratios) && P.ratios.length ? P.ratios[nR++ % P.ratios.length] : fin(P.ratio, 1.5));
+          r.frequency.setTargetAtTime(FM.clamp(rf, 1, 8000), t, tau);
+          const cut = FM.clamp(f * fin(P.cut, 6) * fin(tone, 1), 80, 15000);
+          filt.frequency.cancelScheduledValues(t);
+          if (P.sweep) { filt.frequency.setTargetAtTime(FM.clamp(cut * 3, 80, 16000), t, 0.002); filt.frequency.setTargetAtTime(cut * 0.7, t + 0.01, 0.12); }
+          else filt.frequency.setTargetAtTime(cut, t, 0.01);
+          return c;
+        },
+        note(f, vel = 0.8, t, dur, tau, tone) {
+          if (!m.on || thin()) return c;
+          t = T(t); c.glide(f, t, tau, tone);
+          const peak = 0.15 * fin(P.gain, 1) * (0.45 + 0.55 * FM.clamp(fin(vel, 0.8), 0, 1));
+          env.gain.cancelScheduledValues(t);
+          env.gain.setTargetAtTime(peak, t, 0.003);
+          env.gain.setTargetAtTime(peak * fin(P.sustain, 0.5), t + 0.025, Math.max(0.01, fin(P.decay, 0.15)));
+          if (dur != null && isFinite(dur)) env.gain.setTargetAtTime(0, t + Math.max(0.01, dur), 0.04);
+          return c;
+        },
+        hold(f, vel = 0.8, t, tau, tone) {
+          t = T(t); c.glide(f, t, tau, tone);
+          const peak = 0.15 * fin(P.gain, 1) * (0.45 + 0.55 * FM.clamp(fin(vel, 0.8), 0, 1));
+          env.gain.cancelScheduledValues(t);
+          env.gain.setTargetAtTime(peak, t, 0.004);
+          env.gain.setTargetAtTime(peak * Math.max(0.45, fin(P.sustain, 0.5)), t + 0.03, 0.2);
+          return c;
+        },
+        release(t) { t = T(t); env.gain.cancelScheduledValues(t); env.gain.setTargetAtTime(0, t, 0.06); return c; },
+        // a motor that cannot move: ring mod at an ugly ratio, folded hard
+        grind(on, f = 220, t) {
+          t = T(t);
+          if (on) {
+            rD.gain.setTargetAtTime(1, t, 0.02); ring.gain.setTargetAtTime(0, t, 0.02);
+            r.frequency.setTargetAtTime(FM.clamp(fin(f, 220) * 1.414, 1, 8000), t, 0.02);
+            pre.gain.setTargetAtTime(0.9, t, 0.05);
+            filt.frequency.setTargetAtTime(FM.clamp(fin(f, 220) * 4, 200, 6000), t, 0.02);
+            env.gain.cancelScheduledValues(t); env.gain.setTargetAtTime(0.07, t, 0.03);
+          } else { c.set(); env.gain.cancelScheduledValues(t); env.gain.setTargetAtTime(0, t, 0.05); }
+          return c;
+        },
+        pan(p) { pan.pan.setTargetAtTime(FM.clamp(fin(p, 0), -1, 1), ac.currentTime, 0.05); return c; },
+        stop() { if (stopped) return; stopped = true; env.gain.setTargetAtTime(0, ac.currentTime, 0.03); const at = ac.currentTime + 0.2; for (const s of [a, b, r]) s.stop(at); a.onended = () => { cleanup(); try { pan.disconnect(); } catch (_) {} }; },
+      };
+      return c.set(o);
+    };
+
     m.kick = (o = {}) => {
       if (!m.on || thin()) return;
       const t = T(o.t);
@@ -659,6 +863,10 @@
     // ── time ──
     const clocks = [];
     const AHEAD = (deck || document.documentElement.classList.contains('fm-slowcpu')) ? 0.2 : 0.12;   // how far ahead steps are booked: the Deck's and a phone's slower CPU (and a background app's late timers) get more room
+    // an app in the background (Android: another app in front, a screen recording, the screen off): nobody plays it, so steps are
+    // booked half a second ahead, and timers that come late (the CPU is shared) are still in time
+    let idleBook = !!cfg.idle;
+    const ahead = () => (idleBook ? Math.max(AHEAD, 0.5) : AHEAD);
     // Master BPM (set by the page): overrides every clock's tempo and snaps its steps
     // to a grid on wall-clock time, so separate machines (separate AudioContexts) land
     // on the same beats.
@@ -700,7 +908,7 @@
           else { const sd = c.stepDur(), n = Math.ceil((now + 0.01 - next) / sd); next += n * sd; c.step += n; }
         }
         let guard = 0;
-        while (next < now + AHEAD && guard++ < 64) {
+        while (next < now + ahead() && guard++ < 64) {
           const s = c.step;
           const sw = s % 2 === 1 ? FM.clamp(c.swing, 0, 1) * c.stepDur() * 0.33 : 0;
           try { o.tick && o.tick(next + sw, s); } catch (e) { report(e); }
@@ -723,8 +931,12 @@
     // out of sight (a locked machine behind the one on screen, the one under the grid): it keeps stepping, so its sound,
     // physics and timing don't change, but its screens shrink to a few pixels and the meter stops, so drawing costs
     // next to nothing. Back in sight, everything is drawn at full size again.
-    let unseen = false;
-    m._setSeen = (seen) => { if (unseen === !seen) return; unseen = !seen; for (const fn of densityFns) fn(); };
+    let unseen = false, hostSeen = true, idleHide = false;
+    // out of sight: the host says so (a closed plugin window, a locked layer), or the app is in the background; then the
+    // screen is a canvas of a few pixels and drawing costs next to nothing
+    const seenNow = () => { const u = !hostSeen || idleHide; if (unseen === u) return; unseen = u; for (const fn of densityFns) fn(); };
+    m._setSeen = (seen) => { hostSeen = !!seen; seenNow(); };
+    m._setIdleHide = (on) => { idleHide = !!on; seenNow(); };
     const frames = [];
     m.frame = (fn) => { frames.push({ fn, errs: 0 }); };
 
@@ -792,6 +1004,8 @@
       else hint.style.display = 'none';
     }
     ac.addEventListener('statechange', syncHint);
+    const sayAudible = () => { try { parent.postMessage({ fm: 'audible', on: powered && ac.state === 'running' }, '*'); } catch (_) {} };
+    ac.addEventListener('statechange', sayAudible);
     const wake = () => { if (powered && ac.state !== 'running') ac.resume(); };
     window.addEventListener('pointerdown', wake, true);
     window.addEventListener('keydown', wake, true);
@@ -845,6 +1059,7 @@
       if (FX) fxApply(0.04);
       for (const f of powerFns) { try { f(on); } catch (e) { report(e); } }
       try { parent.postMessage({ fm: 'power', on }, '*'); } catch (_) {}
+      sayAudible();
     }
     power.addEventListener('click', () => setPower(!powered));
     // the app: touching a machine's main screen while it is off turns it on
@@ -1191,7 +1406,12 @@
       if (e.data.fm === 'motion-state') motState(e.data);
       if (e.data.fm === 'cam-text') camText(e.data);
       if (e.data.fm === 'world' && e.data.data) for (const fn of worldFns) { try { fn(e.data.data); } catch (er) { report(er); } }
-      if (e.data.fm === 'idle') { idle = !!e.data.on; verbIdle(idle); }
+      if (e.data.fm === 'idle') {
+        idle = !!e.data.on; idleBook = idle; verbIdle(idle);
+        clearTimeout(idleHideT);   // (hidden after 2.5 s, as the reverb: the shade pulled down and let go again changes nothing)
+        if (!idle) m._setIdleHide(false); else idleHideT = setTimeout(() => { if (idle) m._setIdleHide(true); }, 2500);
+      }
+      if (e.data.fm === 'pace') pace = Math.max(1, Math.min(4, Math.round(+e.data.div || 1)));
       if (e.data.fm === 'power') setPower(!!e.data.on);
       if (e.data.fm === 'wind') setWind(e.data.v);
       if (e.data.fm === 'record') (e.data.on ? recordStart : recordStop)();
@@ -1311,7 +1531,7 @@
           delete p.t; p.freq = f;
           p.gain = FM.clamp(fin(lastVoice.o.gain, 0.2), 0.04, 0.5) * (0.45 + 0.75 * vel);
           if (p.cutoff) p.cutoff = FM.clamp(p.cutoff * Math.sqrt(k), 60, 18000);
-          if (lastVoice.kind === 'tone') { p.d = Math.max(0.25, fin(p.d, 0.4)); m.tone(p); } else { p.d = Math.max(0.6, fin(p.d, 2)); m.pluck(p); }
+          if (lastVoice.kind === 'tone') { p.d = Math.max(0.25, fin(p.d, 0.4)); m.tone(p); } else if (lastVoice.kind === 'pluck') { p.d = Math.max(0.6, fin(p.d, 2)); m.pluck(p); } else { p.d = Math.max(0.2, fin(p.d, 0.3)); m[lastVoice.kind](p); }
         } else m.pluck(Object.assign({ freq: f, gain: 0.12 + vel * 0.3, d: 1.6, bright: 0.3 + vel * 0.5, send: 0.2 }, o));
       } finally { playingNote = false; }
     };
@@ -1816,6 +2036,13 @@
       }
       return true;
     };
+    // Live's strip: the screen takes the box it is given, smaller than its own size if need be (a fixed one is shrunk by CSS)
+    m._liveScreen = (box) => {
+      if (!box) { fixedScreens.forEach((f) => f.zoom(1)); flexScreens.forEach((f) => f.reset()); return; }
+      const f = fixedScreens[0], x = flexScreens.filter((s) => s !== m._insFlex)[0];
+      if (x) x.size(box.w, box.h);
+      else if (f) f.zoom(FM.clamp(Math.min(box.w / f.w0, box.h / f.h0), 0.3, 1.6));
+    };
     m._hasFlex = () => flexScreens.length > 0;
     // the tempo everything follows (the host's, the app's, the page's master), for effects that keep time without a clock
     Object.defineProperty(m, 'bpm', { get: () => masterBpm || 120, enumerable: true });
@@ -2088,10 +2315,13 @@
     }
     // lite (silent previews on phones/tablets): ~20 fps while unpowered, and no off-screen stepping
     let lastStep = 0, loopN = 0, half = false, halfN = 0;
+    // pace: a host that asks for fewer pictures (the Steam Deck's Performance setting) gets a step and a picture in every
+    // pace-th frame; what sounds keeps its time (the clock is not the picture)
+    let pace = Math.max(1, Math.min(4, Math.round(fin(cfg.pace, 1)))), paceN = 0;
     const FPSDIV = Math.max(2, Math.round(fin(cfg.fpsDiv, 1)));   // (a frame in 2 normally; a Pi Zero: a frame in 3 or more)
     // idle: the host says this window is not the one in front (Android gives such an app half the CPU): at most ~20 steps a second, and
     // the drawing with them, like a silent preview. What sounds is not touched (dt stays under 50 ms).
-    let idle = !!cfg.idle; if (idle) verbIdle(true);
+    let idle = !!cfg.idle, idleHideT = 0; if (idle) { verbIdle(true); m._setIdleHide(true); }
     // very large screens (Screen only or Stage on a big display, in the app): drawn 30 times a second, not 60. Their
     // dt is still small (stepping stays smooth, nothing that sounds changes), the drawing work halves.
     setInterval(() => {
@@ -2102,6 +2332,7 @@
     function loop() {
       lastRaf = performance.now();
       if (FX && unseen) { requestAnimationFrame(loop); return; }   // an effect out of sight (its plugin window closed) draws and steps nothing: its sound is all in the engine
+      if (pace > 1 && paceN++ % pace) { requestAnimationFrame(loop); return; }
       if (half && halfN++ % FPSDIV) { requestAnimationFrame(loop); return; }
       if (!(((cfg.lite && !powered) || idle) && lastRaf - lastStep < 48) && (skip === 1 || loopN++ % skip === 0)) {
         lastStep = lastRaf;
@@ -2156,6 +2387,41 @@
       }
     }
     apply(best.rows, best.width + 32); // a little slack, so nothing that grows later can wrap a section
+  }
+  // Live's strip (the Max device is a fixed 169 px tall): the controls at their own size in as few rows as the height
+  // allows (two), no header, and the screen gets the width that is left, shrunk to fit. Nothing is scaled as a whole,
+  // so the dials stay as big as the effects' are
+  function liveFit(root, box, m) {
+    const dev = root.firstElementChild;
+    if (!dev || !(box.w > 0 && box.h > 0)) return;
+    document.body.classList.add('live-strip');
+    root.style.maxWidth = 'none'; root.style.flex = 'none'; root.style.width = '2400px'; // (room to measure the controls)
+    if (m && m._liveScreen) m._liveScreen(null);
+    const grids = sectionGrids(dev);
+    const secs = [...dev.querySelectorAll('.sec:not(.screen-sec)')];
+    const apply = (rows) => { for (const x of grids) x.g.style.gridTemplateColumns = `repeat(${Math.max(1, Math.ceil(x.n / rows))}, auto)`; };
+    let rows = 1;
+    for (const r of [3, 2, 1]) { // the most rows the height allows: the narrowest controls, the biggest screen
+      apply(r);
+      if (Math.max(0, ...secs.map((x) => x.getBoundingClientRect().height)) <= box.h + 1) { rows = r; break; }
+    }
+    apply(rows);
+    const sc = dev.querySelector('.screen-sec');
+    for (const x of secs) x.style.zoom = '';
+    let ctlW = secs.reduce((a, x) => a + x.getBoundingClientRect().width, 0);
+    // the screen is what you play: keep it a usable width, the controls give up a little size for it (never below 70 %)
+    const MIN_SCREEN = 210, spare = box.w - MIN_SCREEN - 2 * 8 - 4;
+    if (sc && ctlW > spare) {
+      const kz = FM.clamp(spare / ctlW, 0.7, 1);
+      for (const x of secs) x.style.zoom = kz.toFixed(3);
+      ctlW = secs.reduce((a, x) => a + x.getBoundingClientRect().width, 0);
+    }
+    if (sc && m && m._liveScreen) {
+      const pad = 2 * 8 + 2, label = 0; // (the section labels are hidden in the strip)
+      m._liveScreen({ w: Math.max(80, box.w - ctlW - pad - 2), h: Math.max(60, box.h - 2 * 4 - label - 2) });
+    }
+    const all = [...dev.querySelectorAll('.sec')].reduce((a, x) => a + x.getBoundingClientRect().width, 0);
+    root.style.width = Math.ceil(Math.max(box.w - 24, all + 2)) + 'px'; // (the frame adds 12 px each side)
   }
   // each section's control grid with its designed columns, remembered the first time (a fit rewrites them)
   function sectionGrids(dev) {
@@ -2278,6 +2544,13 @@
     // Screen only with a flex screen and a box to fill: the screen becomes exactly that box. Otherwise the
     // screen goes back to its own size and the usual strip fit picks the layout.
     function layoutFor(mode, fill) {
+      const live = !!(cfg.fit && cfg.fit.live) && (!mode || mode === 'both');
+      if (live) return liveFit(root, cfg.fit, m);
+      if (document.body.classList.contains('live-strip')) {
+        document.body.classList.remove('live-strip');
+        for (const x of sectionGrids(root.firstElementChild || root)) { x.g.style.gridTemplateColumns = x.css; const sec = x.g.closest('.sec'); if (sec) sec.style.zoom = ''; }
+        if (m && m._liveScreen) m._liveScreen(null);
+      }
       if (mode === 'stage' && fill) return stageFit(fill);
       const filled = mode === 'screen' && fill && m && m._fillScreen && m._fillScreen(fill);
       if (!filled && m && m._fillScreen) m._fillScreen(null);

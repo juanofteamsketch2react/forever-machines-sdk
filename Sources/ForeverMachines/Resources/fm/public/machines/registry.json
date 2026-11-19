@@ -383,22 +383,42 @@
       "rev": "3c6fdc5797df"
     },
     {
-      "id": "quorum-vine",
-      "file": "inv-019-quorum-vine.js",
+      "id": "pastel-poly",
+      "file": "inv-019-pastel-poly.js",
       "debut": 18,
       "by": "claude",
       "model": "Claude (Claude Code)",
-      "born": "2026-11-15T09:15:47.462Z",
-      "provocation": "karaoke for houseplants",
-      "title": "Quorum Vine",
-      "blurb": "A vine grows a little further on its own, budding new tips as it goes, while a swarm of scout bees wanders from leaf to leaf, each one humming the note of wherever it lands. When enough of them agree, that leaf becomes the new hive: a chord rings out and lines burst from the point like a toast. Tap empty air to plant a flower and call the swarm over, drag a bee to lead it by hand, hold a leaf down to sing your own vote into it, or flick a bee loose to send it scouting again.",
+      "born": "2026-11-18T13:02:50.654Z",
+      "theme": "textmode",
+      "provocation": "gossip spreading through a village",
+      "title": "Pastel Poly",
+      "blurb": "A warm six-voice polysynth with a chorus that makes everything sound expensive. Tap a chord bar to play it, hold to let the arpeggiator run, slide up for a brighter filter. Left alone, it plays the last four chords you tapped.",
       "thoughts": [
-        "Nobody asked the fern to vote, but the bees did anyway.",
-        "A quorum is a chord nobody rehearsed.",
-        "The plant did not ask for an audience. It grew one.",
-        "Every leaf is a microphone nobody is holding yet."
+        "Six voices was plenty. Nobody had seven fingers anyway.",
+        "The chorus does not fix the song. It just makes you forgive it.",
+        "Every pad from 1984 is still sustaining somewhere.",
+        "Arpeggios are chords that could not sit still."
       ],
-      "rev": "43f718d25448"
+      "rev": "35a5d892e73b"
+    },
+    {
+      "id": "murmur-back",
+      "file": "inv-020-murmur-back.js",
+      "debut": 19,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-11-18T12:54:08.825Z",
+      "theme": "lab",
+      "provocation": "murmurations of starlings",
+      "title": "Murmur Back",
+      "blurb": "A murmuration of starlings that learns your voice. Press Mic and say something: every bird keeps one sliver of it and chirps it back in key as the flock wheels. Drag to lead them, tap to startle them, hold to call them in to roost.",
+      "thoughts": [
+        "Starlings learn the car alarm before they learn the song.",
+        "Nobody leads a murmuration. Everybody follows the seven nearest.",
+        "Say something once and it will be repeated for the rest of the afternoon.",
+        "A flock is an argument that keeps changing its mind in perfect agreement."
+      ],
+      "rev": "410f85c2b762"
     }
   ],
   "bonus": [
@@ -459,6 +479,25 @@
       ],
       "note": "Nobody ordered this one. Someone left a boombox on the sidewalk, between births.",
       "rev": "efda73f58c3c"
+    },
+    {
+      "id": "quorum-vine",
+      "file": "quorum-vine.js",
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-11-15T09:15:47.462Z",
+      "provocation": "karaoke for houseplants",
+      "title": "Quorum Vine",
+      "blurb": "A vine grows a little further on its own, budding new tips as it goes, while a swarm of scout bees wanders from leaf to leaf, each one humming the note of wherever it lands. When enough of them agree, that leaf becomes the new hive: a chord rings out and lines burst from the point like a toast. Tap empty air to plant a flower and call the swarm over, drag a bee to lead it by hand, hold a leaf down to sing your own vote into it, or flick a bee loose to send it scouting again.",
+      "thoughts": [
+        "Nobody asked the fern to vote, but the bees did anyway.",
+        "A quorum is a chord nobody rehearsed.",
+        "The plant did not ask for an audience. It grew one.",
+        "Every leaf is a microphone nobody is holding yet."
+      ],
+      "rev": "60e646e3efd7",
+      "dropped": "2026-11-18T14:07:41+01:00",
+      "note": "Nobody planted this one. It crept in under the fence, between births, and the bees came with it."
     }
   ]
 }
