@@ -38,6 +38,26 @@ public struct FMControl: Sendable, Hashable {
     public let options: [String]
 }
 
+/// How much reverb the machines keep. The kit's reverb is a convolution, the costliest thing on the audio thread.
+public enum FMReverb: Sendable {
+    /// As the machine asks for it.
+    case full
+    /// A shorter tail (about a third): a drier sound for less than half the work.
+    case light
+    /// None.
+    case off
+    var scale: Double { switch self { case .full: 1; case .light: 0.35; case .off: 0 } }
+}
+
+/// What the next arrival in the collection is: the next weekly birth, or a scheduled bonus drop.
+public struct FMArrival: Sendable, Hashable {
+    public enum Kind: Sendable { case birth, bonus }
+    public let date: Date
+    public let kind: Kind
+    /// The number the new machine will have (a bonus machine's is only known once it has dropped: nil).
+    public let number: Int?
+}
+
 @MainActor
 public final class FMSession {
     public struct Options: Sendable {
@@ -49,6 +69,8 @@ public final class FMSession {
         public var mixWithOthers = false
         /// Show the session on the lock screen and in Control Center, with play and pause.
         public var nowPlaying: String? = nil
+        /// How much reverb the machines keep (applies to machines mounted after the session is made).
+        public var reverb: FMReverb = .full
         public init() {}
     }
 
@@ -58,12 +80,21 @@ public final class FMSession {
     public var onWind: ((WindState) -> Void)?
     public var wind: WindState { winder.state }
     public private(set) var isPlaying = false
+    /// The master volume, 0 to 1 (default 1), for every machine of the session, ramped smoothly.
+    public var volume: Double = 1 {
+        didSet {
+            volume = min(1, max(0, volume))
+            for m in machines { m.core.setVolume(volume) }
+        }
+    }
+    /// Whether the audio engine is running. It stops about half a second after the last machine is powered off.
+    public var isAudioRunning: Bool { output.isRunning }
 
     let output: AudioOutput
     private let winder = Wind()
     private var driftOn = false, bpm = 0.0
     private var observers: [NSObjectProtocol] = []
-    var catalogCache: (at: Date, list: [FMCatalogEntry])?
+    var catalogCache: (at: Date, list: [FMCatalogEntry], next: FMArrival?)?
     var effectsCache: [FMEffect]?
 
     public init(options: Options = Options()) {
@@ -130,6 +161,7 @@ public final class FMSession {
     func boot(_ s: FMMachine.Spec, state: String, playing: Bool? = nil) throws -> FMCoreMachine {
         let root = Bundle.module.url(forResource: "fm", withExtension: nil)!.path
         let core = FMCoreMachine(root: root, sampleRate: output.sampleRate)
+        core.reverbScale = options.reverb.scale
         var extra = s.extra
         if let fx = s.effect, extra.hasSuffix("}") {   // (the effect's title, for its section)
             let t = String(data: try JSONSerialization.data(withJSONObject: [fx.title]), encoding: .utf8)!.dropFirst().dropLast()
@@ -139,6 +171,7 @@ public final class FMSession {
             try core.bootCode(s.code, name: s.name, skin: s.skin, state: state, seed: s.seed, effect: s.effect?.code ?? "", effectMix: s.effectMix, extra: extra)
         } catch { throw FMError.boot(error.localizedDescription) }
         core.start(withFPS: 30)
+        core.setVolume(volume)
         core.post(#"{"fm":"power","on":\#(playing ?? isPlaying)}"#)
         if driftOn { core.post(#"{"fm":"drift","on":true}"#) }
         if bpm > 0 { core.post(#"{"fm":"tempo","bpm":\#(bpm),"anchor":0}"#) }
@@ -227,6 +260,7 @@ public final class FMMachine {
     private(set) var core: FMCoreMachine
     private var spec: Spec
     private weak var session: FMSession?
+    private var fader = (gain: 1.0, shownFps: 30.0, drawing: true)
 
     init(core: FMCoreMachine, spec: Spec, session: FMSession) {
         self.core = core; self.spec = spec; self.session = session
@@ -234,8 +268,24 @@ public final class FMMachine {
         wire()
     }
 
+    // (the core under the machine is replaced when an effect is put in or taken out: what the machine was asked for goes on it)
     private func wire() {
         core.onRequest = { [weak self, network = session?.options.network ?? true] json in Task { @MainActor in self?.answer(json, network: network) } }
+        core.setGain(fader.gain, fade: 0)
+        core.fps = fader.drawing ? fader.shownFps : 0
+        watch()
+    }
+
+    private func watch() {
+        let frame = Pending(), ctl = Pending()
+        core.onFrame = onFrame == nil ? nil : { [weak self] in
+            guard frame.claim() else { return }
+            Task { @MainActor in frame.release(); if let self, let f = self.onFrame, let img = self.core.copyScreenImage() { f(img) } }
+        }
+        core.onControls = onControls == nil ? nil : { [weak self] json in
+            guard ctl.claim() else { return }
+            Task { @MainActor in ctl.release(); if let self, let f = self.onControls { f(FMMachine.parse(self.core.controlsCached())) } }
+        }
     }
 
     /// Puts a Forever Effect inside the machine (its id, from effects()), or takes it off (nil). The machine starts again
@@ -262,6 +312,27 @@ public final class FMMachine {
     /// The output's loudest moment since last asked (0 to about 1), for a meter or a lantern.
     public var level: Float { core.takePeak() }
 
+    /// The machine's own fader, 0 to 4 (1: as it is), reached over `fade` seconds. Fades are equal-power, so one machine
+    /// fading out while another fades in keeps the loudness: a cross-fade is `a.gain(0, fade: 15)` and `b.gain(1, fade: 15)`.
+    /// The session's `volume` comes on top of it.
+    public func gain(_ g: Double, fade seconds: Double = 0) {
+        fader.gain = min(4, max(0, g))
+        core.setGain(fader.gain, fade: seconds)
+    }
+
+    /// Called on the main thread when a control's value or text changed, at most about ten times a second (Drift moves the
+    /// knobs): the list as `controls()` gives it. Nothing is read or parsed while it is nil, and nothing on the main thread
+    /// waits for the machine either way.
+    public var onControls: (([FMControl]) -> Void)? { didSet { watch() } }
+
+    /// Called on the main thread with a new picture of the screen, only when it changed. Nothing is copied while it is nil
+    /// or while the machine is not drawing.
+    public var onFrame: ((CGImage) -> Void)? { didSet { watch() } }
+
+    /// Goes up when the screen's picture changed (while `onFrame` is set, or `screenImage()` was asked for in the last second,
+    /// and the machine is drawing). An app that polls copies a frame only when this moved.
+    public var screenVersion: UInt64 { core.screenVersion }
+
     public func power(_ on: Bool) { isPlaying = on; post(#"{"fm":"power","on":\#(on)}"#) }
 
     /// The colours of the skin it wears, as CSS colours by role: page, page-ink, dev (the device), head, line, ink, dim,
@@ -272,9 +343,16 @@ public final class FMMachine {
         return (try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: String]) ?? [:]
     }
 
-    /// The machine's controls, in Macro order first.
+    /// The machine's controls, in Macro order first. Read from a copy the machine's own thread refreshes (a few times a
+    /// second while someone asks, at once after a control was set), so the main thread never waits for it: it can lag
+    /// by about a tenth of a second. For changes as they happen, use `onControls`.
     public func controls() -> [FMControl] {
-        let json = core.evaluate("__fmDeliver({ fm: 'controls', native: true }); JSON.stringify(__fmControls)")
+        var json = core.controlsCached()
+        if json.isEmpty { json = core.evaluate("__fmDeliver({ fm: 'controls', native: true }); JSON.stringify(__fmControls)") }   // (the first time)
+        return FMMachine.parse(json)
+    }
+
+    static func parse(_ json: String) -> [FMControl] {
         guard let list = try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [[String: Any]] else { return [] }
         return list.compactMap { c in
             guard let key = c["key"] as? String, let kind = c["kind"] as? String else { return nil }
@@ -324,8 +402,24 @@ public final class FMMachine {
     public var screenSize: CGSize { core.screenSize }
     /// A touch on the screen, in its points: "pointerdown", "pointermove", "pointerup".
     public func pointer(_ type: String, x: Double, y: Double, down: Bool) { core.pointer(type, x: x, y: y, buttons: down ? 1 : 0) }
-    /// How often the machine runs its timers and draws (10–60). Lower it while nothing shows the screen.
-    public var framesPerSecond: Double { get { core.fps } set { core.fps = newValue } }
+    /// How often the machine runs its timers and draws, 1 to 60 (default 30; what you set is what you read). Lower it while
+    /// the screen is small or still. 0 stops the drawing: see `drawing`.
+    public var framesPerSecond: Double {
+        get { fader.drawing ? core.fps : 0 }
+        set {
+            if newValue <= 0 { drawing = false; return }
+            fader.shownFps = min(60, max(1, newValue)); fader.drawing = true
+            core.fps = fader.shownFps
+        }
+    }
+
+    /// Whether the machine draws its screen. Off, it is told it is not seen: its screen shrinks to a few pixels, no picture
+    /// is made or copied, and the drawing thread idles (timers and sound go on, the page ticking at 20 a second while the
+    /// machine plays, 4 while it does not). Turn it off while the window is hidden or covered; on again to show it.
+    public var drawing: Bool {
+        get { fader.drawing }
+        set { fader.drawing = newValue; core.fps = newValue ? fader.shownFps : 0 }
+    }
 
     public func destroy() { core.stop(); session?.remove(self) }
 
@@ -354,4 +448,12 @@ public final class FMMachine {
             reply(["status": (response as? HTTPURLResponse)?.statusCode ?? 200, "body": String(data: data ?? Data(), encoding: .utf8) ?? ""])
         }.resume()
     }
+}
+
+// a flag the machine's thread and the main thread share: at most one hop to the main thread in flight
+private final class Pending: @unchecked Sendable {
+    private let lock = NSLock()
+    private var busy = false
+    func claim() -> Bool { lock.lock(); defer { lock.unlock() }; if busy { return false }; busy = true; return true }
+    func release() { lock.lock(); busy = false; lock.unlock() }
 }

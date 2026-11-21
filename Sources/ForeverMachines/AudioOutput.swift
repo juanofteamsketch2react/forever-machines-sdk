@@ -8,7 +8,6 @@ final class AudioOutput {
     let sampleRate: Double
     private var lock = os_unfair_lock()
     private var cores: [FMCoreMachine] = []
-    private var gain: Float = 1
     private var scratchL = [Float](repeating: 0, count: 8192)
     private var scratchR = [Float](repeating: 0, count: 8192)
 
@@ -71,4 +70,5 @@ final class AudioOutput {
     }
 
     func pause() { if let e = engineStorage, e.isRunning { e.pause() } }
+    var isRunning: Bool { engineStorage?.isRunning ?? false }
 }

@@ -96,6 +96,12 @@ window.FM_THEMES = (function () {
       accent: '#ff8a1c', accent2: '#2f5d4a', 'accent-ink': '#1c1d1a', track: '#7d7a70', field: '#cbc8bc', 'field-ink': '#1c1d1a',
       screen: '#12231c', 'screen-ink': '#ffb35c', 'screen-alt': '#f2df4a', 'screen-dim': '#2c4a3d',
     }),
+    // a pond at night: deep teal water, a pink lotus, fireflies (the sleep retreat's own skin)
+    T('lagoon', 'Lagoon', {
+      page: '#04141a', 'page-ink': '#cdeee6', dev: '#0b2a31', head: '#0e343c', line: '#1a4c56', ink: '#d9f5ee', dim: '#6fa7a4',
+      accent: '#ff8fc0', accent2: '#5cf2c8', 'accent-ink': '#04141a', track: '#12404a', field: '#06191e', 'field-ink': '#d9f5ee',
+      screen: '#031014', 'screen-ink': '#5cf2c8', 'screen-alt': '#ff8fc0', 'screen-dim': '#0f3138',
+    }),
   ];
   const all = curated.concat(extra);
 

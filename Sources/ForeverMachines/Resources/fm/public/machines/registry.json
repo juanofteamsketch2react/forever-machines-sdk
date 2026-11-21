@@ -498,6 +498,25 @@
       "rev": "60e646e3efd7",
       "dropped": "2026-11-18T14:07:41+01:00",
       "note": "Nobody planted this one. It crept in under the fence, between births, and the bees came with it."
+    },
+    {
+      "id": "lotus-pond",
+      "file": "lotus-pond.js",
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-11-15T20:00:00.000Z",
+      "title": "Lotus Pond",
+      "blurb": "A pond after dark: drops fall in key, crickets keep time badly, a frog has opinions, and somewhere a stream goes on. Tap the water for a drop (higher up sings higher), drag to let it rain, tap a lily pad to wake its frog, or drag the pad somewhere else. The pond remembers where you left them.",
+      "thoughts": [
+        "A pond is a room with one very quiet wall.",
+        "Crickets invented the metronome and then ignored it.",
+        "Every drop is a small bell that the water agrees to ring.",
+        "The frog is not part of the music. Nobody has told the frog."
+      ],
+      "theme": "lagoon",
+      "dropped": "2026-11-20T07:50:39+01:00",
+      "note": "It was built for a night at the retreat by the sea, and slipped out through the garden gate to join the collection.",
+      "rev": "bff13b39ca89"
     }
   ]
 }

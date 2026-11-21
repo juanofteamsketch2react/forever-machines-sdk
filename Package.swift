@@ -8,8 +8,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "FMCore",
-            url: "https://github.com/juanofteamsketch2react/forever-machines-sdk/releases/download/0.3.2/FMCore.xcframework.zip",
-            checksum: "ff683dbae8e849ed4b5d355f3a2f2b3d3715eba645ae99e229aad0f142c08c6f"
+            url: "https://github.com/juanofteamsketch2react/forever-machines-sdk/releases/download/0.4.0/FMCore.xcframework.zip",
+            checksum: "d1b12500a87eab9739d77059870f5c74760da502baea5be2777eabb7f3b618df"
         ),
         .target(
             name: "ForeverMachines",

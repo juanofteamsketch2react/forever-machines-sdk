@@ -14,7 +14,7 @@ On the web, use the JavaScript SDK instead: `npm install @forevermachines/sdk` (
 In Xcode: File → Add Package Dependencies → `https://github.com/juanofteamsketch2react/forever-machines-sdk`. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.3.2")
+.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.4.0")
 ```
 
 ```swift
@@ -44,7 +44,7 @@ dependencyResolutionManagement {
 }
 ```
 
-In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.3.2")`
+In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.4.0")`
 
 ```kotlin
 import net.forevermachines.sdk.FMSession
@@ -66,9 +66,11 @@ Android 8+ (API 26), arm64, armv7 and x86_64.
 |---|---|
 | `mount(name)` | A machine: bundled (`slow-tide`, `night-choir`, `seven-bowls`, `lotus-pond`, `rain-window`, `long-breath`) or a species of the collection (`loom`). Also from a URL or from source. `skin:` a skin's name or a whole skin as JSON. |
 | `mount(number:)` (iOS) / `mountNumber(n)` (Android) | No. N of the collection exactly as the site plays it: its species, seed, skin and name (a bonus machine: 501 and up). Each machine's placard on the site has the line. |
-| `catalog()` | Every machine born so far, as the site numbers them: number, no, name, species, seed, skin, blurb, thought. Computed by the site's own catalog code. |
+| `catalog()` / `catalog(refresh: true)` | Every machine born so far, as the site numbers them: number, no, name, species, seed, skin, blurb, thought. Computed by the site's own catalog code; kept 10 minutes or until the next arrival, whichever comes first (so a new machine is there the moment it is born); `refresh` asks again now. |
+| `nextArrival()` | The next weekly birth or scheduled bonus drop, as the site works it out: its date, `.birth` or `.bonus`, and the number the new machine will have (not given away for a bonus). Schedule your check for it, then `catalog(refresh: true)`. |
 | `effects()`, `mount(…, effect:, effectMix:)`, `machine.effect(id, mix)`, `effectMix(v)` | The Forever Effects: any of them inside any machine, on or off while it plays. |
 | `power(on)` | All machines on or off. |
+| `volume` | The master volume, 0–1 (default 1), for every machine, ramped smoothly. No need to reach into the audio engine. |
 | `windDown(minutes)` / `cancelWindDown()` | Ends the music by itself in about that many minutes (never exactly, never twice alike). `onWind` reports it. |
 | `drift(on)` | The first smooth knobs wander slowly. |
 | `tempo(bpm)` | A shared tempo for the machines that follow one. |
@@ -76,6 +78,11 @@ Android 8+ (API 26), arm64, armv7 and x86_64.
 | `machine.macro(n, v)`, `macros()` | Macro 1–8: the first eight knobs, the same as in Ableton Live and the web SDK. |
 | `machine.note(n, velocity, on)` | A MIDI note, answered in the machine's own voice. |
 | `machine.level` | The output level, for a meter. |
+| `machine.gain(g, fade:)` | The machine's own fader, 0–4 (1: as it is), reached over `fade` seconds. Fades are equal-power: one machine fading out while another fades in keeps its loudness, so `a.gain(0, fade: 15)` with `b.gain(1, fade: 15)` is a cross-fade. `volume` comes on top. |
+| `machine.onControls` | Called on the main thread when a control's value or text changed (Drift moves the knobs), about ten times a second at most, with the list `controls()` gives. Nothing is read while it is nil. `controls()` itself reads a copy the machine's own thread keeps, so it never makes the main thread wait for the page. |
+| `machine.onFrame`, `screenVersion` | A new picture of the screen, only when it changed (`CGImage` / `Bitmap`). Or poll `screenImage()` / `screenBitmap()` and copy only when `screenVersion` moved. Reads come from a copy made after each frame: no waiting for the page. |
+| `machine.drawing`, `framesPerSecond` | `framesPerSecond` is 1–60 (default 30) and reads back what you set. `drawing = false` (or 0) stops the drawing: the machine is told it is not seen, its screen shrinks to a few pixels, no picture is made or copied, and the page's thread idles (timers and sound go on). Use it while the window is hidden or covered. |
+| `options.reverb` | `.full` (as the machine asks), `.light` (a shorter tail, about a third: drier, less than half the work) or `.off`. Applies to machines mounted after the session is made. |
 | `machine.screenImage()` / `screenBitmap()`, `pointer(…)`, `fitScreen(w, h)` | The machine's own screen, to show and play: `fitScreen` lays it out at your view's size (tall or wide) and the machine redraws to fill it. |
 | `machine.colors` | The skin's colours by role (dev, head, line, ink, dim, accent, accent2, track, field, screen …): dress your own panel in the machine's look, as the demo apps do. |
 

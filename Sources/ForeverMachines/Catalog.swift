@@ -41,9 +41,16 @@ struct FMEffectCode { let title: String; let code: String }
 
 extension FMSession {
     /// Every machine born so far, in order, then the bonus machines: number, name, species, seed, skin. Fetched from
-    /// options.base (kept 10 minutes); offline, the bundled registry.
-    public func catalog() async throws -> [FMCatalogEntry] {
-        if let c = catalogCache, Date().timeIntervalSince(c.at) < 600 { return c.list }
+    /// options.base and kept 10 minutes, or until the next arrival, whichever is first (so a machine is there the moment it
+    /// is born); `refresh: true` fetches it again now. Offline, the bundled registry.
+    public func catalog(refresh: Bool = false) async throws -> [FMCatalogEntry] { try await loadCatalog(refresh: refresh).list }
+
+    /// The next weekly birth or scheduled bonus drop, worked out by the site's own catalog code (nil offline with nothing
+    /// bundled to go by). Schedule your check for this moment, then ask `catalog(refresh: true)`.
+    public func nextArrival(refresh: Bool = false) async throws -> FMArrival? { try await loadCatalog(refresh: refresh).next }
+
+    func loadCatalog(refresh: Bool) async throws -> (list: [FMCatalogEntry], next: FMArrival?) {
+        if !refresh, let c = catalogCache, Date().timeIntervalSince(c.at) < 600, c.next.map({ Date() < $0.date }) ?? true { return (c.list, c.next) }
         let bundled = { (p: String) in (try? String(contentsOf: Bundle.module.url(forResource: "fm", withExtension: nil)!.appendingPathComponent(p), encoding: .utf8)) ?? "" }
         async let reg = try? fetchText(options.base.appendingPathComponent("machines/registry.json"))
         async let themes = try? fetchText(options.base.appendingPathComponent("themes.js"))
@@ -57,14 +64,21 @@ extension FMSession {
         _ = page.evaluate(online ? t! : bundled("public/themes.js"))
         _ = page.evaluate(online ? c! : bundled("public/catalog.js"))
         let json = page.evaluate("""
-            (function (reg) { const b = FMCatalog.build(reg, Date.now());
-              return JSON.stringify([...b.catalog, ...b.bonus].map((c) => ({ number: c.i + 1, no: c.no || String(c.i + 1).padStart(3, '0'),
+            (function (reg) { const now = Date.now(), b = FMCatalog.build(reg, now);
+              const clk = FMCatalog.clock(reg), w = clk.weeksAt(now);
+              let next = { at: clk.bornAt(w + 1), kind: 'birth', number: reg.genesis + w + 1 };
+              for (const x of reg.bonus || []) { const at = Date.parse(x.dropped); if (x.file && at > now && at < next.at) next = { at, kind: 'bonus' }; }
+              return JSON.stringify({ next, list: [...b.catalog, ...b.bonus].map((c) => ({ number: c.i + 1, no: c.no || String(c.i + 1).padStart(3, '0'),
                 name: c.name, species: c.arch.title || c.arch.id, speciesId: c.arch.id, file: c.arch.file, seed: c.seed, skin: c.theme.name,
-                theme: JSON.stringify(c.theme), blurb: c.arch.blurb || '', thought: c.thought || '', original: !!c.original, bonus: !!c.bonus, born: c.born })));
+                theme: JSON.stringify(c.theme), blurb: c.arch.blurb || '', thought: c.thought || '', original: !!c.original, bonus: !!c.bonus, born: c.born })) });
             })(\(registry))
             """)
-        guard let list = try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [[String: Any]] else {
+        guard let all = try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any], let list = all["list"] as? [[String: Any]] else {
             throw FMError.boot("the catalog: \(json.prefix(200))")
+        }
+        let next = (all["next"] as? [String: Any]).flatMap { n -> FMArrival? in
+            guard let at = n["at"] as? Double else { return nil }
+            return FMArrival(date: Date(timeIntervalSince1970: at / 1000), kind: n["kind"] as? String == "bonus" ? .bonus : .birth, number: n["number"] as? Int)
         }
         let out = list.map { o in
             FMCatalogEntry(number: o["number"] as? Int ?? 0, no: o["no"] as? String ?? "", name: o["name"] as? String ?? "",
@@ -73,8 +87,8 @@ extension FMSession {
                            thought: o["thought"] as? String ?? "", original: o["original"] as? Bool ?? false, bonus: o["bonus"] as? Bool ?? false,
                            born: Date(timeIntervalSince1970: (o["born"] as? Double ?? 0) / 1000), themeJSON: o["theme"] as? String ?? "")
         }
-        if online { catalogCache = (Date(), out) }
-        return out
+        if online { catalogCache = (Date(), out, next) }
+        return (out, next)
     }
 
     /// The Forever Effects collection (those released so far): id, title, blurb.
