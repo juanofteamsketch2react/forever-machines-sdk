@@ -1685,7 +1685,9 @@
     // slowly round where you left them, each on its own long, uneven wave of one to four minutes, so a machine left
     // alone keeps changing. Touch one and it wanders round its new place; turned off, every knob goes back home.
     // Never sent on as automation (hosts would record it). Off unless the page turns it on ({ fm: 'drift', on }).
-    const DRIFT_DEPTH = 0.13, DRIFT_KNOBS = 6;
+    // Cheap on purpose: the waves are minutes long, so a knob is only moved when it has travelled a step you could hear
+    // (a knob move redraws it, saves state and tells the host), twice a second at most, and not at all while it stands still.
+    const DRIFT_DEPTH = 0.13, DRIFT_KNOBS = 6, DRIFT_TICK = 500, DRIFT_STEP = 0.004;
     let drift = null;
     function setDrift(on) {
       if (!!drift === !!on) return;
@@ -1701,7 +1703,7 @@
           const v = ctlByKey[key].get01();
           return { key, home: v, last: v, per: [60 + r() * 180, 23 + r() * 40], ph: [r() * 6.28, r() * 6.28], dir: r() < 0.5 ? -1 : 1 };
         });
-      drift = { knobs, t0: performance.now() / 1000, timer: setInterval(driftTick, 250) };
+      drift = { knobs, t0: performance.now() / 1000, timer: setInterval(driftTick, DRIFT_TICK) };
     }
     function driftTick() {
       if (!drift || !powered) return;
@@ -1713,7 +1715,9 @@
         if (Math.abs(now - d.last) > 0.004) d.home = now; // moved by hand, a macro or a controller: its new home
         const fade = Math.min(1, t / 20); // (it sets off gently)
         const w = 0.8 * Math.sin((6.2832 * t) / d.per[0] + d.ph[0]) + 0.2 * Math.sin((6.2832 * t) / d.per[1] + d.ph[1]);
-        c.apply(FM.clamp(d.home + d.dir * DRIFT_DEPTH * fade * (w - 0.8 * Math.sin(d.ph[0]) - 0.2 * Math.sin(d.ph[1])), 0, 1));
+        const target = FM.clamp(d.home + d.dir * DRIFT_DEPTH * fade * (w - 0.8 * Math.sin(d.ph[0]) - 0.2 * Math.sin(d.ph[1])), 0, 1);
+        if (Math.abs(target - now) < DRIFT_STEP) continue;
+        c.apply(target);
         d.last = c.get01();
       }
     }

@@ -14,7 +14,7 @@ On the web, use the JavaScript SDK instead: `npm install @forevermachines/sdk` (
 In Xcode: File → Add Package Dependencies → `https://github.com/juanofteamsketch2react/forever-machines-sdk`. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.4.1")
+.package(url: "https://github.com/juanofteamsketch2react/forever-machines-sdk", from: "0.4.2")
 ```
 
 ```swift
@@ -44,7 +44,7 @@ dependencyResolutionManagement {
 }
 ```
 
-In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.4.1")`
+In the app's `build.gradle.kts`: `implementation("net.forevermachines:sdk:0.4.2")`
 
 ```kotlin
 import net.forevermachines.sdk.FMSession

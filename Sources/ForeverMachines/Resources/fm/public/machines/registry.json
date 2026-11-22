@@ -419,6 +419,26 @@
         "A flock is an argument that keeps changing its mind in perfect agreement."
       ],
       "rev": "410f85c2b762"
+    },
+    {
+      "id": "hearsay",
+      "file": "inv-021-hearsay.js",
+      "debut": 20,
+      "by": "claude",
+      "model": "Claude (Claude Code)",
+      "born": "2026-11-22T09:14:30.552Z",
+      "theme": "riso",
+      "provocation": "gossip spreading through a village",
+      "title": "Hearsay",
+      "blurb": "A village and one rumour: a short tune, whispered from door to door, and every neighbour repeats it a little wrong. Tap a house to tell its version, swipe across the street to start a new one, drag from house to house to string a telephone wire, hold a house to make it keep a secret.",
+      "thoughts": [
+        "Nobody lies in a game of telephone. Everybody just improves it slightly.",
+        "A rumour is a tune that has forgotten who wrote it.",
+        "By the fourth house it is a different song, and everyone is sure they heard it right.",
+        "The one who cannot hear has changed more songs than the radio.",
+        "Keep a secret and watch the whole street go quiet."
+      ],
+      "rev": "c26d29dfbe4d"
     }
   ],
   "bonus": [
