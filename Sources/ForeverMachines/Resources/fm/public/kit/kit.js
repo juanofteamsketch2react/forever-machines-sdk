@@ -1557,6 +1557,11 @@
     const txt = (e) => (e ? e.textContent.trim() : '');
     function describeNative() {
       const out = [];
+      // a machine that runs on a clock but has no Tempo knob still gets a Tempo control (40-240 bpm) for apps and hosts that list controls
+      if (clocks.length && !tempoKnobs.length) {
+        if (!ctlByKey.__tempo) registerCtl('__tempo', 'Tempo', document.createElement('div'), (v01) => setMaster(40 + 200 * FM.clamp(fin(v01, 0.4), 0, 1)), 'knob', () => FM.clamp((Math.round(clocks[0].bpm) - 40) / 200, 0, 1));
+        const bpm = Math.round(clocks[0].bpm); out.push({ key: '__tempo', kind: 'knob', label: 'Tempo', sec: '', v: FM.clamp((bpm - 40) / 200, 0, 1), text: bpm + ' bpm' });
+      }
       document.querySelectorAll('.sec').forEach((sec) => {
         const secLabel = txt(sec.querySelector(':scope > .sec-label'));
         sec.querySelectorAll('.ctl').forEach((w) => {
