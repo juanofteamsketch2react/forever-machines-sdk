@@ -389,7 +389,9 @@
     }
     if (d.ended) for (const id of d.ended) { const r = nodes.get(id), n = r && r.deref(); if (n) { nodes.delete(id); n._ended(); } }
     if (d.an) for (const id in d.an) {
-      const bin = atob(d.an[id]), u = new Uint8Array(bin.length);
+      const v = d.an[id];
+      if (typeof v !== 'string') { snaps.set(+id, new Float32Array(v)); continue; }
+      const bin = atob(v), u = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
       snaps.set(+id, new Float32Array(u.buffer));
     }
