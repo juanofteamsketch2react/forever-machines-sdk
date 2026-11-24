@@ -11,6 +11,8 @@ final class AudioOutput {
     private var scratchL = [Float](repeating: 0, count: 8192)
     private var scratchR = [Float](repeating: 0, count: 8192)
 
+    deinit { if let o = configObserver { NotificationCenter.default.removeObserver(o) } }
+
     init() {
         #if os(iOS) || os(tvOS) || os(visionOS)
         let rate = AVAudioSession.sharedInstance().sampleRate
@@ -23,6 +25,8 @@ final class AudioOutput {
     // the engine and its source node are made on the first start, not before: nothing touches the audio hardware
     // until something plays
     private var engineStorage: AVAudioEngine?
+    private var wanted = false
+    private var configObserver: NSObjectProtocol?
     var engine: AVAudioEngine {
         if let e = engineStorage { return e }
         let e = AVAudioEngine()
@@ -34,6 +38,11 @@ final class AudioOutput {
         e.attach(node)
         e.connect(node, to: e.mainMixerNode, format: format)
         engineStorage = e
+        // a new output (headphones, a sample-rate change) stops the engine without a word: start it again if it should play
+        configObserver = NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChange, object: e, queue: .main) { [weak self] _ in
+            guard let self, self.wanted, !e.isRunning else { return }
+            e.prepare(); try? e.start()
+        }
         return e
     }
 
@@ -66,9 +75,10 @@ final class AudioOutput {
         #if os(iOS) || os(tvOS) || os(visionOS)
         try AVAudioSession.sharedInstance().setActive(true)
         #endif
+        wanted = true
         if !engine.isRunning { engine.prepare(); try engine.start() }
     }
 
-    func pause() { if let e = engineStorage, e.isRunning { e.pause() } }
+    func pause() { wanted = false; if let e = engineStorage, e.isRunning { e.pause() } }
     var isRunning: Bool { engineStorage?.isRunning ?? false }
 }
